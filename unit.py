@@ -1,4 +1,4 @@
-import globals as gb
+import global_vars as gb
 
 
 class Unit:
@@ -8,7 +8,7 @@ class Unit:
 		self.coordinates = self.get_coordinates(self.occupied_hex)
 		self.is_selected = False
 		self.power = power
-		self.movement = movement_points
+		self.movement_points = movement_points
 		self.current_power = power
 		self.current_movement_points = movement_points
 		self.parameters_text = gb.unit_font.render(''.join(str(power) + '-' + str(movement_points)), 1, gb.WHITE)
@@ -21,10 +21,10 @@ class Unit:
 		gb.INFO_SURFACE.blit(info_text, info_position)
 
 	def is_possible_to_move(self, hexagon):
+		river = 1 if self.crossing_the_river(hexagon) else 0
 		if self.uses_road_movement(hexagon):
-			mp_factor = self.current_movement_points - 1 >= 0
+			mp_factor = self.current_movement_points - 1 - river >= 0
 		else:
-			river = 1 if self.crossing_the_river(hexagon) else 0
 			mp_factor = self.current_movement_points - self.occupied_hex.terrain.movement_cost - river >= 0
 		stack_limit = True
 		return self.occupied_hex.is_adjacent(hexagon) and mp_factor and stack_limit
@@ -39,7 +39,6 @@ class Unit:
 		if self.is_possible_to_move(hexagon):
 			self.coordinates = self.get_coordinates(hexagon)
 			self.current_movement_points -= 1 if self.uses_road_movement(hexagon) else hexagon.terrain.movement_cost
-			print(self.crossing_the_river(hexagon))
 			self.current_movement_points -= 1 if self.crossing_the_river(hexagon) else 0
 			self.occupied_hex = hexagon
 
@@ -58,4 +57,7 @@ class Unit:
 	def appear(self):
 		self.coordinates = self.get_coordinates(self.occupied_hex)
 		gb.game_map.screen.map_surface.blit(self.surface, self.coordinates)
+
+	def restore_movement_points(self):
+		self.current_movement_points = self.movement_points
 

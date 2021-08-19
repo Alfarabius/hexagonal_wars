@@ -1,0 +1,46 @@
+# Elite Infantry
+EI 3 12 1
+EI 3 12 1
+EI 3 12 0
+EI 3 12 0
+EI 3 12 0
+EI 3 12 0
+EI 3 12 0
+EI 3 12 0
+# Regular Infantry
+I 2 12 1
+I 2 12 1
+I 2 12 1
+I 2 12 0
+I 2 12 0
+# Green Infantry
+GI 1 12 1
+GI 1 12 1
+GI 1 12 0
+# Fanatic Militia
+FM 2 10 1
+FM 2 10 1
+FM 2 10 1
+FM 2 10 1
+FM 2 10 1
+# Militia
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+M 1 10 1
+# Artillery
+A 2
+# Leaders
+L Demyanov
+L Cherdinov
+L Kolyadin
+L Pestel
+L Rumin
+L Pavlov

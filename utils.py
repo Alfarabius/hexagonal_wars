@@ -1,5 +1,5 @@
 import random
-import globals as gb
+import global_vars as gb
 
 
 def get_random_color():
