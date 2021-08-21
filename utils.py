@@ -1,5 +1,15 @@
 import random
+
+import pygame
+
+import global_vars
 import global_vars as gb
+
+
+def get_adopted_image(path, size):
+	image = pygame.image.load(path + global_vars.FORMAT).convert_alpha()
+	image = pygame.transform.smoothscale(image, size)
+	return image
 
 
 def get_random_color():

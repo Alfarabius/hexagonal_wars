@@ -69,12 +69,12 @@ class HexInfoBox:
 		self.settlement_text = global_vars.font.render(terrain.settlement, 1, (0, 0, 0))
 		self.rivers_text = global_vars.font.render(str(terrain.rivers), 1, (0, 0, 200))
 		self.roads_text = global_vars.font.render(str(terrain.roads), 1, (100, 100, 0))
-		self.info_position = self.axial_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.TEXT_OFFSET))
-		self.cube_position = self.cube_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.TEXT_OFFSET * 3))
-		self.type_position = self.type_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.TEXT_OFFSET * 5))
-		self.settlement_position = self.settlement_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.TEXT_OFFSET * 7))
-		self.rivers_position = self.rivers_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.TEXT_OFFSET * 9))
-		self.roads_position = self.roads_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.TEXT_OFFSET * 11))
+		self.info_position = self.axial_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 3))
+		self.cube_position = self.cube_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 5))
+		self.type_position = self.type_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 7))
+		self.settlement_position = self.settlement_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 9))
+		self.rivers_position = self.rivers_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 11))
+		self.roads_position = self.roads_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 13))
 
 	def write_info(self):
 		self.surface.blit(self.axial_text, self.info_position)
@@ -230,7 +230,7 @@ class Map:
 				that_hex.is_selected = False
 
 	@staticmethod
-	def parse_terrain(line):
+	def _parse_terrain(line):
 		line = line.split(', ')
 		settlement = line[1] if '0' not in line[1] else None
 		rivers = (0, 0, 0, 0, 0, 0) if 'r(' not in line[2] else tuple(int(x) for x in line[2] if x.isdigit())
@@ -249,7 +249,7 @@ class Map:
 		file.readline()
 		for line in file:
 			if '#' not in line:
-				terrain.append(self.parse_terrain(line))
+				terrain.append(self._parse_terrain(line))
 		return terrain
 
 	def scroll(self, pos):

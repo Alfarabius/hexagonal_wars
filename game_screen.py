@@ -1,6 +1,7 @@
 import pygame
 
 import global_vars
+import utils
 
 
 class Screen:
@@ -9,6 +10,8 @@ class Screen:
 		self.height = row * global_vars.HEX_EDGE * 1.8 + global_vars.HEXES_OFFSET * 2
 		self.top_left = [0, 0]
 		self.info_surface = pygame.Surface(global_vars.INFO_SIZE)
+		self.frame_surface = utils.get_adopted_image('assets/frame', global_vars.SCREEN)
+		self.frame_position = self.frame_surface.get_rect(topleft=(0, 0))
 		self.map_surface = pygame.Surface(global_vars.MAP_SIZE)
 		self.scroll_zone = pygame.Surface((global_vars.MAP_WIDTH + global_vars.FRAME, global_vars.HEIGHT))
 		self.not_scroll_zone = pygame.Surface((global_vars.MAP_WIDTH - global_vars.RATIO * 4, global_vars.HEIGHT - global_vars.H_RATIO * 6))
@@ -30,5 +33,6 @@ class Screen:
 		map_offset = global_vars.FRAME + global_vars.INFO_WIDTH
 		global_vars.window.blit(self.info_surface, (global_vars.FRAME, global_vars.FRAME))
 		global_vars.window.blit(self.map_surface, (map_offset, global_vars.FRAME))
-		self.info_surface.fill(self.info_color)
+		self.info_surface.fill(global_vars.INFO_COLOR)
+		global_vars.window.blit(self.frame_surface, self.frame_position)
 		self.map_surface.fill(self.map_color)

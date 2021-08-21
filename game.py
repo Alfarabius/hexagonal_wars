@@ -2,31 +2,29 @@ import pygame
 
 import global_vars
 import interface
-import map
 import player
 
 
 class Game:
-	def __init__(self, game_map_file, players, sequence, turns=9):
-		pygame.display.set_caption(global_vars.NAME)
-		self._screen_flags = pygame.FULLSCREEN
-		self.window = pygame.display.set_mode(global_vars.SCREEN, self._screen_flags)
+	def __init__(self, game_map, army_file, sequence, turns=9):
 		self.interface = interface.Interface()
-		self.game_map = map.Map(game_map_file)
-		self.players = [player.Player(players[0]), player.Player(players[1])]
+		self.game_map = game_map
+		self.players = [player.Player(army_file[0]), player.Player(army_file[1])]
+		self.current_player = self.players[1]
 		self.clock = pygame.time.Clock()
 		self.turns = turns
 		self.sequence = sequence
 		self.turn = 0
 		self._mouse_pos = (0, 0)
 		self.is_running = True
+		self.selected_unit = None
 
 	def game_loop(self):
 		while self.is_running:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
 					self.quit_procedure()
-			for unit in (self.players[x].army for x in range(2)):
+			for unit in self.current_player.army:
 				if unit.is_selected:
 					unit.write_unit_info()
 			self.play_turn()
@@ -61,22 +59,30 @@ class Game:
 				current_hex = that_hex
 			else:
 				that_hex.clear_hex()
-		if current_hex and mouse_pressed[0]:
+		if current_hex and mouse_pressed[2]:
 			current_hex.select()
 			global_vars.game_map.unselect_other_hexes(current_hex)
-			for unit in (self.players[x].army for x in range(2)):
+			if self.selected_unit is not None:
+				self.selected_unit.unselect()
+				self.selected_unit = None
+			for unit in self.current_player.army:
 				if unit.occupied_hex == current_hex:
 					unit.select()
-				elif unit.is_selected:
-					unit.move(current_hex)
-					unit.unselect()
+					i = self.current_player.army.index(unit)    # experiment
+					x = self.current_player.army.pop(i)         # experiment
+					self.current_player.army.insert(0, x)       # experiment
+					self.selected_unit = unit
+					break
+		if mouse_pressed[0] and current_hex and self.selected_unit is not None:
+			self.selected_unit.move(current_hex)
 		global_vars.game_map.scroll(self._mouse_pos)
 
 	def redraw_screen(self):
 		self.game_map.screen.draw()
 		self.game_map.draw_map()
-		for unit in (self.players[x].army for x in range(2)):
-			unit.appear()
+		for _player in self.players:
+			for unit in _player.army:
+				unit.appear()
 
 	def play_turn(self):
 		self.key_handler()
@@ -85,6 +91,6 @@ class Game:
 
 	def end_turn(self):
 		#   end turn procedure
-		for unit in (self.players[x].army for x in range(2)):
+		for unit in self.current_player.army:
 			unit.restore_movement_points()
 		self.turn += 1
