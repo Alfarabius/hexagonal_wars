@@ -1,5 +1,5 @@
 # I_had_a_comrade
-Hex and counter wargame.
+Hex and counter wargame.\n
 Work in progress.
 <p align="center">
   <img src="assets/comrade.png" width="60%" />
