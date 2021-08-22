@@ -8,6 +8,8 @@ Work in progress.
 
 ### How to run it
 
+You need pygame for run this project: https://www.pygame.org/wiki/GettingStarted
+
 To run it use ``python main.py``
 
 ### Controls
