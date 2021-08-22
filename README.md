@@ -3,7 +3,7 @@ Hex and counter wargame.
 
 Work in progress.
 <p align="center">
-  <img src="assets/comrade.png" width="100%" />
+  <img src="assets/comrade.png" width="60%" />
 </p>
 
 ### How to run it
