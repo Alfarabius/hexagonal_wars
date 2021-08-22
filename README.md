@@ -12,4 +12,8 @@ To run it use ``python main.py``
 
 ### Controls
 
-Scroll around the map ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``→``
+Scroll around the map by ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``→``.
+
+To select unit use ``LMB``, to move selected unit use ``RMB``
+
+To exit the game, press ``ESC``.
