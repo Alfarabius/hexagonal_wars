@@ -5,6 +5,9 @@ Work in progress.
   <img src="assets/comrade.png" width="60%" />
 </p>
 ### How to run it
+
 To run it use ``python main.py``
+
 ### Controls
+
 Scroll around the map ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``→`
