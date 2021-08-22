@@ -1,6 +1,5 @@
 # I_had_a_comrade
 Hex and counter wargame.
-
 Work in progress.
 <p align="center">
   <img src="assets/comrade.png" width="60%" />
