@@ -17,3 +17,9 @@ Scroll around the map by ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``�
 To select unit use ``LMB``, to move selected unit use ``RMB``
 
 To exit the game, press ``ESC``.
+
+### Screenshot
+
+<p align="center">
+  <img src="assets/screen.png" width="60%" />
+</p>
