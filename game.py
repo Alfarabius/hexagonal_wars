@@ -49,7 +49,7 @@ class Game:
 	def mouse_handler(self):
 		current_hex = None
 		new_mouse_pos = pygame.mouse.get_pos()
-		mouse_pressed = pygame.mouse.get_pressed(5)
+		mouse_pressed = pygame.mouse.get_pressed(3)
 		if new_mouse_pos != self._mouse_pos:
 			self._mouse_pos = tuple(new_mouse_pos)
 		for that_hex in self.game_map.hexes:
@@ -62,11 +62,11 @@ class Game:
 		if current_hex and mouse_pressed[2]:
 			current_hex.select()
 			global_vars.game_map.unselect_other_hexes(current_hex)
-			if self.selected_unit is not None:
-				self.selected_unit.unselect()
-				self.selected_unit = None
 			for unit in self.current_player.army:
-				if unit.occupied_hex == current_hex:
+				if not unit.is_selected and unit.occupied_hex == current_hex:
+					if self.selected_unit is not None:
+						self.selected_unit.unselect()
+						self.selected_unit = None
 					unit.select()
 					i = self.current_player.army.index(unit)    # experiment
 					x = self.current_player.army.pop(i)         # experiment
