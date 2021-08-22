@@ -11,4 +11,4 @@ To run it use ``python main.py``
 
 ### Controls
 
-Scroll around the map ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``→`
+Scroll around the map ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``→``
