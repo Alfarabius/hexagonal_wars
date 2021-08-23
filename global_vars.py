@@ -13,8 +13,8 @@ pygame.init()
 display_info = pygame.display.Info()
 WIDTH = display_info.current_w
 HEIGHT = display_info.current_h
-# WIDTH = 1920
-# HEIGHT = 1080
+# WIDTH = 1280
+# HEIGHT = 800
 RATIO = WIDTH / 100
 H_RATIO = HEIGHT / 100
 SCREEN = (WIDTH, HEIGHT)
