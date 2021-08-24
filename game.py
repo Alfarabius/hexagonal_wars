@@ -25,9 +25,14 @@ class Game:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
 					self.quit_procedure()
+			y_offset, x_offset, n = 0, 0, 0
 			for unit in self.current_player.army:
-				if unit.is_selected:
-					unit.write_unit_info(self.interface.units_surface)
+				if self.selected_unit is not None and self.selected_unit.occupied_hex == unit.occupied_hex:
+					n += 1
+					unit.write_unit_info(self.interface.units_surface, x_offset, y_offset)
+					x_offset += int(global_vars.UNIT_WIDTH * 1.1)
+					y_offset += int(global_vars.UNIT_HEIGHT * 1.3) if n % 4 == 0 else 0
+					x_offset = 0 if n % 4 == 0 else x_offset
 			self.play_turn()
 			pygame.display.update()
 			self.clock.tick(global_vars.FPS)
@@ -39,6 +44,8 @@ class Game:
 	def interface_handler(self):
 		if self.interface.end_turn_button.is_pushed():
 			self.end_turn()
+		elif self.interface.next_phase_button.is_pushed():
+			pass
 
 	def key_handler(self):
 		keys = pygame.key.get_pressed()

@@ -24,13 +24,17 @@ class Unit:
 		self.parameters_position = self.parameters_text.get_rect(center=global_vars.UNIT_PARAM_OFF)
 		self.surface.blit(self.parameters_text, self.parameters_position)
 
-	def write_unit_info(self, surface):
+	def write_unit_info(self, surface, x_offset, y_offset):
 		if self.name is None:
-			info_text = global_vars.font.render(
-				''.join('MP: ' + str(self.current_movement_points)), 1, global_vars.DARK_GREEN)
+			info_text = global_vars.unit_font.render(
+				''.join('MP: ' + str(self.current_movement_points)), 1, global_vars.BLACK)
 		else:
-			info_text = global_vars.font.render(self.name, 1, global_vars.DARK_GREEN)
-		info_position = info_text.get_rect(topleft=(global_vars.TEXT_OFFSET, int(global_vars.RATIO) * 16))
+			info_text = global_vars.unit_font.render(self.name, 1, global_vars.BLACK)
+		info_position = info_text.get_rect(
+			topleft=(global_vars.TEXT_OFFSET + x_offset, int(global_vars.UNIT_HEIGHT * 1.1) + y_offset))
+		unit_image_position = self.surface.get_rect(
+			topleft=(int(global_vars.RATIO * 0.2) + x_offset, int(global_vars.UNIT_HEIGHT * 0.1) + y_offset))
+		surface.blit(self.surface, unit_image_position)
 		surface.blit(info_text, info_position)
 
 	def is_possible_to_move(self, hexagon):

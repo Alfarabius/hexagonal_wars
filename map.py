@@ -85,7 +85,7 @@ class HexInfoBox:
 
 
 class Hex:
-	def __init__(self, col, row, edge, terrain, info_surface):
+	def __init__(self, col, row, edge, terrain, info):
 		self.axial = (col, row)
 		self.cube_coordinates = self.axial_to_cube_coordinates()
 		self.edge_len = edge
