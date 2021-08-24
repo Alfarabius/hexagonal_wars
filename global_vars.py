@@ -133,6 +133,8 @@ SCROLL_SPEED = int(HEX_EDGE // 4)
 font = pygame.font.SysFont('arial', FONT_SIZE)
 unit_font = pygame.font.SysFont('calibri', int(RATIO))
 # sounds:
+BUTTON_SOUND = pygame.mixer.Sound('sounds/point.ogg')
+BUTTON_SOUND.set_volume(0.3)
 SELECT_SOUND = pygame.mixer.Sound('sounds/end_turn.ogg')
 SELECT_SOUND.set_volume(0.3)
 MOVE_SOUND = pygame.mixer.Sound('sounds/inf.ogg')

@@ -17,6 +17,7 @@ class Game:
 		self.turn = 0
 		self._mouse_pos = (0, 0)
 		self.is_running = True
+		self.lmb_is_pressed = False
 		self.selected_unit = None
 
 	def game_loop(self):
@@ -26,7 +27,7 @@ class Game:
 					self.quit_procedure()
 			for unit in self.current_player.army:
 				if unit.is_selected:
-					unit.write_unit_info()
+					unit.write_unit_info(self.interface.units_surface)
 			self.play_turn()
 			pygame.display.update()
 			self.clock.tick(global_vars.FPS)
@@ -55,7 +56,7 @@ class Game:
 		for that_hex in self.game_map.hexes:
 			if that_hex.is_point_inside_hexagon(self._mouse_pos[0], self._mouse_pos[1]):
 				that_hex.fill_hex(global_vars.SELECT_COLOR, global_vars.SELECT_SIZE)
-				that_hex.info_box.write_info()
+				that_hex.info_box.write_info(self.interface.main_surface)
 				current_hex = that_hex
 			else:
 				that_hex.clear_hex()
@@ -75,11 +76,16 @@ class Game:
 					break
 		if mouse_pressed[0] and current_hex and self.selected_unit is not None:
 			self.selected_unit.move(current_hex)
+		if mouse_pressed[0]:
+			self.lmb_is_pressed = True
+		else:
+			self.lmb_is_pressed = False
 		global_vars.game_map.scroll(self._mouse_pos)
 
 	def redraw_screen(self):
 		self.game_map.screen.draw()
 		self.game_map.draw_map()
+		self.interface.draw(self._mouse_pos, self.lmb_is_pressed)
 		for _player in self.players:
 			for unit in _player.army:
 				unit.appear()

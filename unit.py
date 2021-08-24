@@ -17,19 +17,21 @@ class Unit:
 		self.current_power = power
 		self.current_movement_points = movement_points
 		if name is None:
-			self.parameters_text = global_vars.unit_font.render(''.join(str(power) + ' - ' + str(movement_points)), 1, global_vars.WHITE)
+			self.parameters_text = global_vars.unit_font.render(
+				''.join(str(power) + ' - ' + str(movement_points)), 1, global_vars.WHITE)
 		else:
 			self.parameters_text = global_vars.unit_font.render(self.name, 1, global_vars.WHITE)
 		self.parameters_position = self.parameters_text.get_rect(center=global_vars.UNIT_PARAM_OFF)
 		self.surface.blit(self.parameters_text, self.parameters_position)
 
-	def write_unit_info(self):
+	def write_unit_info(self, surface):
 		if self.name is None:
-			info_text = global_vars.font.render(''.join('MP: ' + str(self.current_movement_points)), 1, global_vars.DARK_GREEN)
+			info_text = global_vars.font.render(
+				''.join('MP: ' + str(self.current_movement_points)), 1, global_vars.DARK_GREEN)
 		else:
 			info_text = global_vars.font.render(self.name, 1, global_vars.DARK_GREEN)
 		info_position = info_text.get_rect(topleft=(global_vars.TEXT_OFFSET, int(global_vars.RATIO) * 16))
-		global_vars.INFO_SURFACE.blit(info_text, info_position)
+		surface.blit(info_text, info_position)
 
 	def is_possible_to_move(self, hexagon):
 		print(self.occupied_hex)
