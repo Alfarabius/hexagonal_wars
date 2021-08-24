@@ -7,7 +7,7 @@ Work in progress.
 
 ### How to run it
 <p align="left">
-  <img src="https://www.pygame.org/thumb/332d0dca2aeac943b6839fb40170e28f.png" width="30%" />
+  <img src="https://www.pygame.org/thumb/332d0dca2aeac943b6839fb40170e28f.png" width="10%" />
 </p>
 You need pygame for run this project: https://www.pygame.org/wiki/GettingStarted
 
