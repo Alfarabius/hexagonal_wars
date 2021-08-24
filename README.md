@@ -5,7 +5,7 @@ Work in progress.
   <img src="assets/comrade.png" width="60%" />
 </p>
 
-### How to run it
+### How to run it?
 <p align="left">
   <img src="https://www.pygame.org/thumb/332d0dca2aeac943b6839fb40170e28f.png" width="15%" />
 </p>
