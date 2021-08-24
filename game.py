@@ -36,6 +36,10 @@ class Game:
 		self.is_running = False
 		pygame.quit()
 
+	def interface_handler(self):
+		if self.interface.end_turn_button.is_pushed():
+			self.end_turn()
+
 	def key_handler(self):
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_LEFT] or keys[pygame.K_a]:
@@ -91,6 +95,7 @@ class Game:
 				unit.appear()
 
 	def play_turn(self):
+		self.interface_handler()
 		self.key_handler()
 		self.mouse_handler()
 		self.redraw_screen()
@@ -100,3 +105,4 @@ class Game:
 		for unit in self.current_player.army:
 			unit.restore_movement_points()
 		self.turn += 1
+		self.current_player = self.players[self.players.index(self.current_player) - 1]
