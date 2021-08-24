@@ -21,5 +21,5 @@ To exit the game, press ``ESC``.
 ### Screenshot
 
 <p align="center">
-  <img src="assets/screen.png" width="100%" />
+  <img src="assets/screen0.png" width="100%" />
 </p>
