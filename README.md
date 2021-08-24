@@ -1,5 +1,8 @@
 # I_had_a_comrade
 Hex and counter wargame.
+<p align="left">
+  <img src="https://www.pygame.org/thumb/332d0dca2aeac943b6839fb40170e28f.png"/>
+</p>
 
 Work in progress.
 <p align="center">
