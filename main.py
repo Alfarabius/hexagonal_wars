@@ -1,3 +1,5 @@
+import threading
+
 import pygame
 
 import game
@@ -12,7 +14,8 @@ def game_music_play():
 
 def main():
 	game_ = game.Game(global_vars.game_map, ('armies/p1_army.txt', 'armies/p2_army.txt'), None, 9)
-	game_music_play()
+	music_thread = threading.Thread(target=game_music_play())
+	music_thread.start()
 	while game_.is_running:
 		game_.game_loop()
 
