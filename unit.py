@@ -38,8 +38,6 @@ class Unit:
 		surface.blit(info_text, info_position)
 
 	def is_possible_to_move(self, hexagon):
-		print(self.occupied_hex)
-		print(hexagon)
 		if not self.occupied_hex.is_adjacent(hexagon):
 			return False
 		river = 1 if self.crossing_the_river(hexagon) else 0
@@ -47,7 +45,8 @@ class Unit:
 			mp_factor = self.current_movement_points - 1 - river >= 0
 		else:
 			mp_factor = self.current_movement_points - self.occupied_hex.terrain.movement_cost - river >= 0
-		stack_limit = True
+		print(hexagon.units_stack, hexagon.terrain.stack_limit)
+		stack_limit = hexagon.units_stack < hexagon.terrain.stack_limit
 		return self.occupied_hex.is_adjacent(hexagon) and mp_factor and stack_limit
 
 	def uses_road_movement(self, hexagon):
@@ -63,7 +62,9 @@ class Unit:
 			self.coordinates = self.get_coordinates(hexagon)
 			self.current_movement_points -= 1 if self.uses_road_movement(hexagon) else hexagon.terrain.movement_cost
 			self.current_movement_points -= 1 if self.crossing_the_river(hexagon) else 0
+			self.occupied_hex.decrease_unit_stack()
 			self.occupied_hex = hexagon
+			self.occupied_hex.increase_unit_stack()
 
 	def select(self):
 		global_vars.SELECT_SOUND.play()

@@ -6,11 +6,21 @@ import player
 
 
 class Game:
-	def __init__(self, game_map, army_file, sequence, turns=9):
+	__instance = None
+
+	def __new__(cls, *args, **kwargs):
+		if not isinstance(cls.__instance, cls):
+			cls.__instance = super(Game, cls).__new__(cls)
+		else:
+			print('Game already exist')
+		return cls.__instance
+
+	def __init__(self, game_map, army_file, sequence, turns=9, curr_player=1):
 		self.interface = interface.Interface()
 		self.game_map = game_map
 		self.players = [player.Player(army_file[0]), player.Player(army_file[1])]
-		self.current_player = self.players[1]
+		self.current_player = self.players[curr_player]
+		self.opposite_player = self.players[(curr_player - 1) * -1]
 		self.clock = pygame.time.Clock()
 		self.turns = turns
 		self.sequence = sequence
@@ -86,7 +96,11 @@ class Game:
 					self.selected_unit = unit
 					break
 		if mouse_pressed[0] and current_hex and self.selected_unit is not None:
-			self.selected_unit.move(current_hex)
+			if not self.opposite_player_unit_in_hex(current_hex):
+				self.selected_unit.move(current_hex)
+			else:
+				print('Attack!')                                # !!!
+				# self.selected_unit.attack(current_hex)
 		if mouse_pressed[0]:
 			self.lmb_is_pressed = True
 		else:
@@ -112,4 +126,11 @@ class Game:
 		for unit in self.current_player.army:
 			unit.restore_movement_points()
 		self.turn += 1
-		self.current_player = self.players[self.players.index(self.current_player) - 1]
+		current_player_index = self.players.index(self.current_player)
+		self.current_player = self.players[current_player_index - 1]
+		self.opposite_player = self.players[current_player_index]
+
+	def opposite_player_unit_in_hex(self, current_hex):
+		for unit in self.opposite_player.army:
+			if unit.occupied_hex == current_hex:
+				return True
