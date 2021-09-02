@@ -6,17 +6,28 @@ import player
 
 
 class Game:
-	def __init__(self, game_map, army_file, sequence, turns=9):
+	__instance = None
+
+	def __new__(cls, *args, **kwargs):
+		if not isinstance(cls.__instance, cls):
+			cls.__instance = super(Game, cls).__new__(cls)
+		else:
+			print('Game already exist')
+		return cls.__instance
+
+	def __init__(self, game_map, army_file, sequence, turns=9, curr_player=1):
 		self.interface = interface.Interface()
 		self.game_map = game_map
 		self.players = [player.Player(army_file[0]), player.Player(army_file[1])]
-		self.current_player = self.players[1]
+		self.current_player = self.players[curr_player]
+		self.opposite_player = self.players[(curr_player - 1) * -1]
 		self.clock = pygame.time.Clock()
 		self.turns = turns
 		self.sequence = sequence
 		self.turn = 0
 		self._mouse_pos = (0, 0)
 		self.is_running = True
+		self.lmb_is_pressed = False
 		self.selected_unit = None
 
 	def game_loop(self):
@@ -24,9 +35,14 @@ class Game:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
 					self.quit_procedure()
+			y_offset, x_offset, n = 0, 0, 0
 			for unit in self.current_player.army:
-				if unit.is_selected:
-					unit.write_unit_info()
+				if self.selected_unit is not None and self.selected_unit.occupied_hex == unit.occupied_hex:
+					n += 1
+					unit.write_unit_info(self.interface.units_surface, x_offset, y_offset)
+					x_offset += int(global_vars.UNIT_WIDTH * 1.1)
+					y_offset += int(global_vars.UNIT_HEIGHT * 1.3) if n % 4 == 0 else 0
+					x_offset = 0 if n % 4 == 0 else x_offset
 			self.play_turn()
 			pygame.display.update()
 			self.clock.tick(global_vars.FPS)
@@ -34,6 +50,12 @@ class Game:
 	def quit_procedure(self):
 		self.is_running = False
 		pygame.quit()
+
+	def interface_handler(self):
+		if self.interface.end_turn_button.is_pushed():
+			self.end_turn()
+		elif self.interface.next_phase_button.is_pushed():
+			pass
 
 	def key_handler(self):
 		keys = pygame.key.get_pressed()
@@ -55,7 +77,7 @@ class Game:
 		for that_hex in self.game_map.hexes:
 			if that_hex.is_point_inside_hexagon(self._mouse_pos[0], self._mouse_pos[1]):
 				that_hex.fill_hex(global_vars.SELECT_COLOR, global_vars.SELECT_SIZE)
-				that_hex.info_box.write_info()
+				that_hex.info_box.write_info(self.interface.main_surface)
 				current_hex = that_hex
 			else:
 				that_hex.clear_hex()
@@ -74,17 +96,27 @@ class Game:
 					self.selected_unit = unit
 					break
 		if mouse_pressed[0] and current_hex and self.selected_unit is not None:
-			self.selected_unit.move(current_hex)
+			if not self.opposite_player_unit_in_hex(current_hex):
+				self.selected_unit.move(current_hex)
+			else:
+				print('Attack!')                                # !!!
+				# self.selected_unit.attack(current_hex)
+		if mouse_pressed[0]:
+			self.lmb_is_pressed = True
+		else:
+			self.lmb_is_pressed = False
 		global_vars.game_map.scroll(self._mouse_pos)
 
 	def redraw_screen(self):
 		self.game_map.screen.draw()
 		self.game_map.draw_map()
+		self.interface.draw(self._mouse_pos, self.lmb_is_pressed)
 		for _player in self.players:
 			for unit in _player.army:
 				unit.appear()
 
 	def play_turn(self):
+		self.interface_handler()
 		self.key_handler()
 		self.mouse_handler()
 		self.redraw_screen()
@@ -94,3 +126,11 @@ class Game:
 		for unit in self.current_player.army:
 			unit.restore_movement_points()
 		self.turn += 1
+		current_player_index = self.players.index(self.current_player)
+		self.current_player = self.players[current_player_index - 1]
+		self.opposite_player = self.players[current_player_index]
+
+	def opposite_player_unit_in_hex(self, current_hex):
+		for unit in self.opposite_player.army:
+			if unit.occupied_hex == current_hex:
+				return True

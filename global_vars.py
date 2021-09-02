@@ -13,8 +13,8 @@ pygame.init()
 display_info = pygame.display.Info()
 WIDTH = display_info.current_w
 HEIGHT = display_info.current_h
-# WIDTH = 1920
-# HEIGHT = 1080
+# WIDTH = 1280
+# HEIGHT = 800
 RATIO = WIDTH / 100
 H_RATIO = HEIGHT / 100
 SCREEN = (WIDTH, HEIGHT)
@@ -33,7 +33,7 @@ INFO_WIDTH = 25 * RATIO
 INFO_HEIGHT = 98.5 * H_RATIO
 INFO_SIZE = (int(INFO_WIDTH), int(INFO_HEIGHT))
 FONT_SIZE = int(RATIO * 2)
-TEXT_OFFSET = int(RATIO) * 3
+TEXT_OFFSET = int(RATIO) * 1
 MAP_WIDTH = 74 * RATIO
 MAP_HEIGHT = 98.5 * H_RATIO
 MAP_SIZE = (int(MAP_WIDTH), int(MAP_HEIGHT))
@@ -133,6 +133,8 @@ SCROLL_SPEED = int(HEX_EDGE // 4)
 font = pygame.font.SysFont('arial', FONT_SIZE)
 unit_font = pygame.font.SysFont('calibri', int(RATIO))
 # sounds:
+BUTTON_SOUND = pygame.mixer.Sound('sounds/point.ogg')
+BUTTON_SOUND.set_volume(0.3)
 SELECT_SOUND = pygame.mixer.Sound('sounds/end_turn.ogg')
 SELECT_SOUND.set_volume(0.3)
 MOVE_SOUND = pygame.mixer.Sound('sounds/inf.ogg')

@@ -31,4 +31,5 @@ class Player:
 		else:
 			name = ''.join(symbol for symbol in line[1] if symbol.isalpha())
 		hexagon = global_vars.game_map.get_random_hex()
+		hexagon.increase_unit_stack()
 		return unit.Unit(power, movement_points, image, name, hexagon)

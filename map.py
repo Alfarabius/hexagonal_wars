@@ -38,12 +38,13 @@ class Terrain:
 
 	def get_stack_limit(self):
 		value = 3
-		if self.settlement == 'city' or 'capital':
+		if self.settlement == 'city' or self.settlement == 'capital':
 			return 6
-		elif self.type == 'forest' or 'hill' or 'mountain':
+		elif self.type == 'forest' or self.type == 'hill' or self.type == 'mountain':
 			value = 2
 		if self.settlement == 'town':
 			return value + 1
+		return value
 
 	def get_movement_cost(self):
 		if self.type == 'mountain':
@@ -61,32 +62,34 @@ class Terrain:
 
 
 class HexInfoBox:
-	def __init__(self, axial, cube_coordinates, terrain, surface):
-		self.surface = surface
+	def __init__(self, axial, cube_coordinates, terrain):
 		self.axial_text = global_vars.font.render(', '.join(str(v) for v in axial), 1, (0, 0, 0))
 		self.cube_text = global_vars.font.render(', '.join(str(v) for v in cube_coordinates), 1, (100, 0, 0))
 		self.type_text = global_vars.font.render(terrain.type, 1, (0, 0, 0))
 		self.settlement_text = global_vars.font.render(terrain.settlement, 1, (0, 0, 0))
 		self.rivers_text = global_vars.font.render(str(terrain.rivers), 1, (0, 0, 200))
 		self.roads_text = global_vars.font.render(str(terrain.roads), 1, (100, 100, 0))
+		self.stack_limit_text = global_vars.font.render(str(terrain.stack_limit), 1, (100, 100, 0))
 		self.info_position = self.axial_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 3))
 		self.cube_position = self.cube_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 5))
 		self.type_position = self.type_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 7))
 		self.settlement_position = self.settlement_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 9))
 		self.rivers_position = self.rivers_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 11))
 		self.roads_position = self.roads_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 13))
+		self.stack_limit_position = self.stack_limit_text.get_rect(topleft=(global_vars.TEXT_OFFSET, global_vars.RATIO * 15))
 
-	def write_info(self):
-		self.surface.blit(self.axial_text, self.info_position)
-		self.surface.blit(self.cube_text, self.cube_position)
-		self.surface.blit(self.type_text, self.type_position)
-		self.surface.blit(self.settlement_text, self.settlement_position)
-		self.surface.blit(self.rivers_text, self.rivers_position)
-		self.surface.blit(self.roads_text, self.roads_position)
+	def write_info(self, surface):
+		surface.blit(self.axial_text, self.info_position)
+		surface.blit(self.cube_text, self.cube_position)
+		surface.blit(self.type_text, self.type_position)
+		surface.blit(self.settlement_text, self.settlement_position)
+		surface.blit(self.rivers_text, self.rivers_position)
+		surface.blit(self.roads_text, self.roads_position)
+		surface.blit(self.stack_limit_text, self.stack_limit_position)
 
 
 class Hex:
-	def __init__(self, col, row, edge, terrain, info_surface):
+	def __init__(self, col, row, edge, terrain, info):
 		self.axial = (col, row)
 		self.cube_coordinates = self.axial_to_cube_coordinates()
 		self.edge_len = edge
@@ -94,8 +97,8 @@ class Hex:
 		self.relative_position = self.get_center_coordinates()
 		self.corners = tuple((self.get_corner_point(i) for i in range(6)))
 		self.terrain = terrain
-		self.info_box = HexInfoBox(self.axial, self.cube_coordinates, self.terrain, info_surface)
-		self.units_inside = list()
+		self.info_box = HexInfoBox(self.axial, self.cube_coordinates, self.terrain)
+		self.units_stack = 0  # ?
 		self.is_filled = False
 		self.is_selected = False
 
@@ -183,12 +186,17 @@ class Hex:
 
 	def select(self):
 		self.is_selected = True
-		self.fill_hex(global_vars.SELECT_COLOR, global_vars.SELECT_SIZE)
 
 	def change_hex_position(self, off_x, off_y):
 		new_x_position = self.relative_position[0] + off_x
 		new_y_position = self.relative_position[1] + off_y
 		return new_x_position, new_y_position
+
+	def increase_unit_stack(self):
+		self.units_stack += 1
+
+	def decrease_unit_stack(self):
+		self.units_stack -= 1
 
 
 class Map:
@@ -215,8 +223,6 @@ class Map:
 	def draw_map(self):
 		for that_hex in self.hexes:
 			that_hex.draw_hex(global_vars.BLUE)
-			if that_hex.is_selected:
-				that_hex.fill_hex(global_vars.SELECT_COLOR, global_vars.SELECT_SIZE)
 			if that_hex.is_filled:
 				that_hex.fill_hex(global_vars.FILL_COLOR, global_vars.SELECT_SIZE)
 

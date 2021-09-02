@@ -17,23 +17,27 @@ class Unit:
 		self.current_power = power
 		self.current_movement_points = movement_points
 		if name is None:
-			self.parameters_text = global_vars.unit_font.render(''.join(str(power) + ' - ' + str(movement_points)), 1, global_vars.WHITE)
+			self.parameters_text = global_vars.unit_font.render(
+				''.join(str(power) + ' - ' + str(movement_points)), 1, global_vars.WHITE)
 		else:
 			self.parameters_text = global_vars.unit_font.render(self.name, 1, global_vars.WHITE)
 		self.parameters_position = self.parameters_text.get_rect(center=global_vars.UNIT_PARAM_OFF)
 		self.surface.blit(self.parameters_text, self.parameters_position)
 
-	def write_unit_info(self):
+	def write_unit_info(self, surface, x_offset, y_offset):
 		if self.name is None:
-			info_text = global_vars.font.render(''.join('MP: ' + str(self.current_movement_points)), 1, global_vars.DARK_GREEN)
+			info_text = global_vars.unit_font.render(
+				''.join('MP: ' + str(self.current_movement_points)), 1, global_vars.BLACK)
 		else:
-			info_text = global_vars.font.render(self.name, 1, global_vars.DARK_GREEN)
-		info_position = info_text.get_rect(topleft=(global_vars.TEXT_OFFSET, int(global_vars.RATIO) * 16))
-		global_vars.INFO_SURFACE.blit(info_text, info_position)
+			info_text = global_vars.unit_font.render(self.name, 1, global_vars.BLACK)
+		info_position = info_text.get_rect(
+			topleft=(global_vars.TEXT_OFFSET + x_offset, int(global_vars.UNIT_HEIGHT * 1.1) + y_offset))
+		unit_image_position = self.surface.get_rect(
+			topleft=(int(global_vars.RATIO * 0.2) + x_offset, int(global_vars.UNIT_HEIGHT * 0.1) + y_offset))
+		surface.blit(self.surface, unit_image_position)
+		surface.blit(info_text, info_position)
 
 	def is_possible_to_move(self, hexagon):
-		print(self.occupied_hex)
-		print(hexagon)
 		if not self.occupied_hex.is_adjacent(hexagon):
 			return False
 		river = 1 if self.crossing_the_river(hexagon) else 0
@@ -41,7 +45,8 @@ class Unit:
 			mp_factor = self.current_movement_points - 1 - river >= 0
 		else:
 			mp_factor = self.current_movement_points - self.occupied_hex.terrain.movement_cost - river >= 0
-		stack_limit = True
+		print(hexagon.units_stack, hexagon.terrain.stack_limit)
+		stack_limit = hexagon.units_stack < hexagon.terrain.stack_limit
 		return self.occupied_hex.is_adjacent(hexagon) and mp_factor and stack_limit
 
 	def uses_road_movement(self, hexagon):
@@ -57,7 +62,9 @@ class Unit:
 			self.coordinates = self.get_coordinates(hexagon)
 			self.current_movement_points -= 1 if self.uses_road_movement(hexagon) else hexagon.terrain.movement_cost
 			self.current_movement_points -= 1 if self.crossing_the_river(hexagon) else 0
+			self.occupied_hex.decrease_unit_stack()
 			self.occupied_hex = hexagon
+			self.occupied_hex.increase_unit_stack()
 
 	def select(self):
 		global_vars.SELECT_SOUND.play()
