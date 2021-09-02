@@ -3,7 +3,6 @@ import random
 import pygame
 
 import global_vars
-import global_vars as gb
 
 
 def get_adopted_image(path, size):
@@ -20,8 +19,8 @@ def get_random_color():
 
 
 def get_random_coordinates():
-	x = float(random.randint(1, gb.WIDTH - gb.UNIT_WIDTH))
-	y = float(random.randint(1, gb.HEIGHT - gb.UNIT_HEIGHT))
+	x = float(random.randint(1, global_vars.WIDTH - global_vars.UNIT_WIDTH))
+	y = float(random.randint(1, global_vars.HEIGHT - global_vars.UNIT_HEIGHT))
 	return [x, y]
 
 
