@@ -1,8 +1,16 @@
 import random
+import threading
 
 import pygame
 
 import global_vars
+
+
+def launch_thread(function):
+	new_thread = threading.Thread(target=function)
+	new_thread.setDaemon(True)
+	new_thread.start()
+	return new_thread
 
 
 def get_adopted_image(path, size):

@@ -98,9 +98,10 @@ class Hex:
 		self.corners = tuple((self.get_corner_point(i) for i in range(6)))
 		self.terrain = terrain
 		self.info_box = HexInfoBox(self.axial, self.cube_coordinates, self.terrain)
-		self.units_stack = 0  # ?
+		self.units_stack = 0
 		self.is_filled = False
 		self.is_selected = False
+		self.units_offset = int(self.units_stack)
 
 	def get_center_coordinates(self):
 		width = self.edge_len * 2
@@ -198,6 +199,15 @@ class Hex:
 	def decrease_unit_stack(self):
 		self.units_stack -= 1
 
+	def decrease_offset(self):
+		self.units_offset -= 1
+
+	def restore_offset(self):
+		self.units_offset = int(self.units_stack)
+
+	def get_units_offset_value(self):
+		return self.units_offset - self.units_stack / 2 - 0.5
+
 
 class Map:
 	def __init__(self, file):
@@ -269,10 +279,12 @@ class Map:
 				ret = self.make_scroll_buffer(0, -global_vars.SCROLL_SPEED)     # DOWN
 				self.screen.top_left[1] += global_vars.SCROLL_SPEED
 		if 0 <= pos[1] <= global_vars.HEIGHT:
-			if global_vars.OFFSET <= pos[0] <= global_vars.OFFSET + global_vars.RATIO * 8 and self.screen.scroll_possible((1, 0)):
+			if global_vars.OFFSET <= pos[0] <= global_vars.OFFSET + global_vars.RATIO * 8 \
+					and self.screen.scroll_possible((1, 0)):
 				ret = self.make_scroll_buffer(global_vars.SCROLL_SPEED, 0)      # LEFT
 				self.screen.top_left[0] -= global_vars.SCROLL_SPEED
-			elif global_vars.WIDTH - global_vars.RATIO * 8 <= pos[0] <= global_vars.WIDTH and self.screen.scroll_possible((-1, 0)):
+			elif global_vars.WIDTH - global_vars.RATIO * 8 <= pos[0] <= global_vars.WIDTH \
+					and self.screen.scroll_possible((-1, 0)):
 				ret = self.make_scroll_buffer(-global_vars.SCROLL_SPEED, 0)     # RIGHT
 				self.screen.top_left[0] += global_vars.SCROLL_SPEED
 		return ret

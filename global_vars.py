@@ -8,7 +8,14 @@ pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.font.init()
 pygame.display.init()
 pygame.init()
+pygame.fastevent.init()
 
+# cursors:
+CURSOR_SELECT = pygame.cursors.arrow
+CURSOR_ATTACK = pygame.cursors.broken_x
+CURSOR_MOVE = pygame.cursors.tri_left
+CURSOR_SCROLL = pygame.cursors.diamond
+CURSOR_BALL = pygame.cursors.ball
 # vars:
 display_info = pygame.display.Info()
 WIDTH = display_info.current_w
@@ -18,6 +25,7 @@ HEIGHT = display_info.current_h
 RATIO = WIDTH / 100
 H_RATIO = HEIGHT / 100
 SCREEN = (WIDTH, HEIGHT)
+MIDDLE_POINT = (WIDTH / 2, HEIGHT / 2)
 # sizes:
 RADIAN = numpy.pi / 180
 SELECT_SIZE = int(RATIO // 2)
@@ -43,11 +51,13 @@ ROAD_WIDTH = int(RATIO//3)
 RIVER_WIDTH = int(RATIO//2)
 UNIT_PARAM_OFF = UNIT_WIDTH//2, UNIT_HEIGHT//2 + RATIO * 1.3
 TERRAIN_SIZE = (int(HEX_WIDTH - RATIO//8), int(HEX_HEIGHT - RATIO//8))
+MODAL_SIZE = (int(WIDTH / 1.4), int(HEIGHT / 1.4))
+START_IMAGE_SIZE = (int(WIDTH / 1.2), int(HEIGHT / 1.4))
+BUTTON_SIZE = (int(14 * RATIO), int(5 * RATIO))
 # time constants:
-FPS = 90
+FPS = 60
 # names and paths:
 NAME = "I had a comrade"
-ICO = "assets/ico.bmp"
 pygame.display.set_caption(NAME)
 _screen_flags = pygame.FULLSCREEN
 window = pygame.display.set_mode(SCREEN, _screen_flags)
@@ -55,6 +65,12 @@ window.fill((255, 255, 255))
 FORMAT = ".bmp"
 if pygame.image.get_extended():
 	FORMAT = '.png'
+
+START_SCREEN = utils.get_adopted_image('assets/comrade', START_IMAGE_SIZE)
+START_SCREEN.set_alpha(255)
+START_SCREEN_POSITION = START_SCREEN.get_rect(center=MIDDLE_POINT)
+
+MODAL_WINDOW = 'assets/modal_window'
 
 OPEN = utils.get_adopted_image('assets/open0', TERRAIN_SIZE)
 CAPITAL = utils.get_adopted_image('assets/capital0', TERRAIN_SIZE)
@@ -104,6 +120,7 @@ UNIT_TYPES_DICT = {
 	'RMI': RED_MILITIA,
 	'RL': RED_LEADER,
 }
+
 # colors:
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -139,6 +156,28 @@ SELECT_SOUND = pygame.mixer.Sound('sounds/end_turn.ogg')
 SELECT_SOUND.set_volume(0.3)
 MOVE_SOUND = pygame.mixer.Sound('sounds/inf.ogg')
 MOVE_SOUND.set_volume(0.3)
+START_SOUND = pygame.mixer.Sound('sounds/fire_smoke.ogg')
+
 # map:
 game_map = map.Map('maps/map_0.map')
 INFO_SURFACE = game_map.screen.info_surface
+COMBAT_TABLE_FILE = 'combat_table/combat_table.json'
+
+
+def starting_screen_fade_out():
+	START_SOUND.play()
+	for i in range(255):
+		START_SCREEN.set_alpha(255 - i)
+		window.fill((255 - i, 255 - i, 255 - i))
+		window.blit(START_SCREEN, START_SCREEN_POSITION)
+		pygame.display.update()
+
+
+def starting_screen():
+	window.fill(INFO_COLOR)
+	window.blit(START_SCREEN, START_SCREEN_POSITION)
+	pygame.display.flip()
+	while True:
+		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+				return starting_screen_fade_out()
