@@ -19,6 +19,11 @@ class Player:
 		self.cards = True   # plug
 		return self.cards
 
+	def replace_unit_to_top(self, current_unit):
+		i = self.army.index(current_unit)
+		temp = self.army.pop(i)
+		self.army.insert(0, temp)
+
 	@staticmethod
 	def _parse_unit(line):
 		line = line.split(' ')
