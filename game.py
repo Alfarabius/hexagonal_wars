@@ -5,7 +5,6 @@ import combat
 import global_vars
 import interface
 import player
-import utils
 
 
 class Game:
@@ -19,7 +18,6 @@ class Game:
 		return cls.__instance
 
 	def __init__(self, game_map, army_file, sequence, turns=9, curr_player=1):
-		self.combat_state = False
 		self.interface = interface.Interface()
 		self.game_map = game_map
 		self.combat_table = combat.CombatTable(global_vars.COMBAT_TABLE_FILE)
@@ -85,16 +83,24 @@ class Game:
 
 	def mouse_handler(self):
 		self._mouse_pos = pygame.mouse.get_pos()
-		self.mouse_buttons_handler()
 		self.current_hex = self.mouse_position_reaction()
 		self.cursor_handler()
 		self.scroll_check()
+		self.mouse_buttons_handler()
 
-		if self.rmb_is_pressed:
-			self.rmb_reaction(self.current_hex)
-
-		if self.lmb_is_pressed:
+	def mouse_buttons_handler(self):
+		mouse_pressed = pygame.mouse.get_pressed(3)
+		if mouse_pressed[0]:
+			self.lmb_is_pressed = True
+		elif self.lmb_is_pressed:
 			self.lmb_reaction(self.current_hex)
+			self.interface_handler()
+			self.lmb_is_pressed = False
+		if mouse_pressed[2]:
+			self.rmb_is_pressed = True
+		elif self.rmb_is_pressed:
+			self.rmb_reaction(self.current_hex)
+			self.rmb_is_pressed = False
 
 	def redraw_screen(self):
 		self.game_map.screen.draw()
@@ -106,7 +112,6 @@ class Game:
 	def play_turn(self):
 		self.key_handler()
 		self.mouse_handler()
-		self.interface_handler()
 		self.modal_windows_handler()
 
 	def end_turn(self):
@@ -138,22 +143,16 @@ class Game:
 		return units
 
 	def combat(self, hexagon):
-		attacking_units = list()
-		attacking_units.append(self.selected_unit)
-		defending_units = self.get_players_units_in_hex(hexagon, self.opposite_player)
-		defending_units_power = sum((unit.power for unit in defending_units))
-		self.combat_state = True
-
-		if self.rmb_is_pressed:
-			if self.current_hex.is_adjacent(hexagon)\
-					and self.is_players_unit_in_hex(self.current_hex, self.current_player):
-				attacking_units.append(self.get_players_units_in_hex(self.current_hex, self.current_player))
-		attacking_units_power = sum((unit.power for unit in attacking_units))
-		ratio = int((attacking_units_power / defending_units_power) * 10)
-		ratio = 3 if ratio < 3 else ratio
-		ratio = 60 if ratio > 60 else ratio
-		combat_result = self.combat_table.return_result(ratio, int(utils.roll_2d6() // 2))
-		print(combat_result)
+		combat.Combat(
+			self.current_player,
+			self.get_players_units_in_hex(hexagon, self.opposite_player),
+			self.combat_table,
+			hexagon
+		).resolve_combat()
+		for player_ in self.players:
+			player_.check_losses()
+		self.selected_unit.unselect()
+		self.selected_unit = None
 
 	def mouse_position_reaction(self):
 		current_hex = None
@@ -165,11 +164,6 @@ class Game:
 			else:
 				that_hex.clear_hex()
 		return current_hex
-
-	def mouse_buttons_handler(self):
-		mouse_pressed = pygame.mouse.get_pressed(3)
-		self.lmb_is_pressed = True if mouse_pressed[0] else False
-		self.rmb_is_pressed = True if mouse_pressed[2] else False
 
 	def rmb_reaction(self, current_hex):
 		if not current_hex:
@@ -190,7 +184,7 @@ class Game:
 		if current_hex and self.selected_unit is not None:
 			if not self.is_players_unit_in_hex(current_hex, self.opposite_player):
 				self.selected_unit.move(current_hex)
-			else:
+			elif self.selected_unit.occupied_hex.is_adjacent(current_hex):
 				self.combat(current_hex)
 
 	def scroll_check(self):
@@ -204,7 +198,8 @@ class Game:
 				['Understand', 'Ok', 'Yeah', 'Cool'],
 				'Test modal window',
 				global_vars.MODAL_SIZE,
-				'assets/screen0').modal_window_process()
+				'assets/screen0'
+			).modal_window_process()
 			self.scenario_queue += 1
 
 	def units_stack_draw(self):

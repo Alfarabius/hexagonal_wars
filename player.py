@@ -5,6 +5,7 @@ import unit
 class Player:
 	def __init__(self, army):
 		self.army = self.parse_army(army)
+		self.reserve = list()
 		self.cards = self.get_hand_of_cards()
 
 	def parse_army(self, army):
@@ -23,6 +24,12 @@ class Player:
 		i = self.army.index(current_unit)
 		temp = self.army.pop(i)
 		self.army.insert(0, temp)
+
+	def check_losses(self):
+		for unit_ in self.army:
+			if unit_.power == 0:
+				self.army.remove(unit_)
+				self.reserve.append(unit_)
 
 	@staticmethod
 	def _parse_unit(line):
