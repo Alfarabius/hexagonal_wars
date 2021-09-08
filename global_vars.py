@@ -52,6 +52,7 @@ RIVER_WIDTH = int(RATIO//2)
 UNIT_PARAM_OFF = UNIT_WIDTH//2, UNIT_HEIGHT//2 + RATIO * 1.3
 TERRAIN_SIZE = (int(HEX_WIDTH - RATIO//8), int(HEX_HEIGHT - RATIO//8))
 MODAL_SIZE = (int(WIDTH / 1.4), int(HEIGHT / 1.4))
+ATTACK_WINDOW_SIZE = (int(WIDTH / 2), int(HEIGHT / 2))
 START_IMAGE_SIZE = (int(WIDTH / 1.2), int(HEIGHT / 1.4))
 BUTTON_SIZE = (int(14 * RATIO), int(5 * RATIO))
 # time constants:
@@ -71,6 +72,7 @@ START_SCREEN.set_alpha(255)
 START_SCREEN_POSITION = START_SCREEN.get_rect(center=MIDDLE_POINT)
 
 MODAL_WINDOW = 'assets/modal_window'
+POINTER = utils.get_adopted_image('assets/pointer', (int(RATIO), int(RATIO)))
 
 OPEN = utils.get_adopted_image('assets/open0', TERRAIN_SIZE)
 CAPITAL = utils.get_adopted_image('assets/capital0', TERRAIN_SIZE)

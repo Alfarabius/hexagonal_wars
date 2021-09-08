@@ -17,7 +17,7 @@ class Button:
 			'hover': (self.button_hover, self.button_hover.get_rect(center=position)),
 			'pushed': (self.button_pushed, self.button_pushed.get_rect(center=position))
 		}
-		self._is_pushed = False
+		self._is_pressed = False
 		self.sound = global_vars.BUTTON_SOUND
 		if text is not None:
 			self.text = global_vars.font.render(text, True, global_vars.BLACK)
@@ -26,18 +26,18 @@ class Button:
 				surface[0].blit(self.text, self.text_position)
 
 	def is_pushed(self):
-		return bool(self._is_pushed)
+		return bool(self._is_pressed)
 
 	def play_sound(self):
 		self.sound.play()
-		pygame.time.wait(250)
 
 	def push(self):
-		self._is_pushed = True
-		self.play_sound()
+		self._is_pressed = True
 
 	def release(self):
-		self._is_pushed = False
+		if self._is_pressed:
+			self.play_sound()
+		self._is_pressed = False
 
 
 class Interface:
@@ -96,14 +96,15 @@ class ModalWindow:
 		self.screenshot.set_alpha(160)
 		self.surface = utils.get_adopted_image(global_vars.MODAL_WINDOW, size)
 		self.surface_position = self.surface.get_rect(center=global_vars.MIDDLE_POINT)
-		self.color_surface = pygame.Surface((global_vars.MODAL_SIZE[0] / 1.05, global_vars.MODAL_SIZE[1] / 1.06))
+		self.color_surface = pygame.Surface((size[0] / 1.05, size[1] / 1.06))
 		self.color_surface_position = self.color_surface.get_rect(center=(size[0] / 2, size[1] / 2))
 		self.text = global_vars.font.render(text, True, global_vars.BLACK)
 		self.text_position = self.text.get_rect(center=(size[0] / 2, size[1] / 1.4))
 		self.size = size
-		self.is_alive = True
 		self.buttons = list()
 		self.pushed_button = None
+		self.return_object = self.pushed_button
+		self.lmb_is_pressed = False
 		buttons_amount = len(buttons_text)
 		for i in range(buttons_amount):
 			b_pos = (size[0] // (buttons_amount + 1) + global_vars.BUTTON_SIZE[0] * i, size[1] - global_vars.RATIO * 6)
@@ -112,13 +113,13 @@ class ModalWindow:
 			self.image = utils.get_adopted_image(picture, (int(size[0] / 2), int(size[1] / 2)))
 			self.image_position = self.image.get_rect(center=(size[0] / 2, size[1] / 3))
 		else:
-			self.image = None
+			self.image = picture
 
 	def __del__(self):
 		os.remove('assets/screenshot.png')
 		print('button is dead')
 
-	def draw(self, mouse_position, lmb_is_pressed):
+	def _draw(self):
 		global_vars.window.blit(self.screenshot, global_vars.ZERO_POINT)
 		global_vars.window.blit(self.surface, self.surface_position)
 		self.surface.blit(self.color_surface, self.color_surface_position)
@@ -126,35 +127,92 @@ class ModalWindow:
 		self.color_surface.blit(self.text, self.text_position)
 		if self.image is not None:
 			self.color_surface.blit(self.image, self.image_position)
+		self._draw_game_objects()
+
+	def buttons_handler(self, mouse_position):
 		for button in self.buttons:
 			cursor_is_on_button = button.states_images.get('hover')[1].collidepoint(
 				mouse_position[0] - self.surface_position.topleft[0],
 				mouse_position[1] - self.surface_position.topleft[1])
-			if cursor_is_on_button and not lmb_is_pressed:
+			if cursor_is_on_button and not self.lmb_is_pressed:
 				self.color_surface.blit(*button.states_images.get('hover'))
-			elif cursor_is_on_button and lmb_is_pressed:
+				button.release()
+			elif cursor_is_on_button and self.lmb_is_pressed:
 				self.color_surface.blit(*button.states_images.get('pushed'))
+				button.push()
 			else:
 				self.color_surface.blit(*button.states_images.get('normal'))
+				button.release()
 
 	def modal_window_process(self):
 		clock = pygame.time.Clock()
-		while self.is_alive:
+		while self.pushed_button is None:
 			pygame.event.get()
 			mouse_position = pygame.mouse.get_pos()
 			mouse_buttons = pygame.mouse.get_pressed(3)
 			global_vars.window.fill(global_vars.BLACK)
-			self.draw(mouse_position, mouse_buttons[0])
+			self._draw()
+			if mouse_buttons[0]:
+				self.lmb_is_pressed = True
+			elif self.lmb_is_pressed:
+				self._select_procedure(mouse_position)
+				self.lmb_is_pressed = False
+			self.buttons_handler(mouse_position)
 			pygame.display.update()
 			clock.tick(30)
-			for i in range(len(self.buttons)):
-				cursor_is_on_button = self.buttons[i].states_images.get('hover')[1].collidepoint(
-					mouse_position[0] - self.surface_position.topleft[0],
-					mouse_position[1] - self.surface_position.topleft[1])
-				if cursor_is_on_button and mouse_buttons[0]:
-					self.pushed_button = i
-					self.is_alive = False
-		return self.pushed_button
+		return self.return_object
+
+	def _select_procedure(self, mouse_position):
+		for i in range(len(self.buttons)):
+			cursor_is_on_button = self.buttons[i].states_images.get('hover')[1].collidepoint(
+				mouse_position[0] - self.surface_position.topleft[0],
+				mouse_position[1] - self.surface_position.topleft[1])
+			if cursor_is_on_button and self.lmb_is_pressed:
+				self.pushed_button = i
+			self._select_game_objects(mouse_position)
+
+	def _draw_game_objects(self):
+		pass
+
+	def _select_game_objects(self, mouse_position):
+		pass
 
 
+class ObjectChoiceWindow(ModalWindow):
+	def __init__(self, buttons_text, text, size, game_objects):
+		super().__init__(buttons_text, text, size)
+		self.game_objects = game_objects
+		self.selected_game_objects = list()
+		self.return_object = self.selected_game_objects
+		self.game_objects_positions = self._get_objects_positions()
+
+	def _draw_game_objects(self):
+		for i, game_object in enumerate(self.game_objects):
+			self.color_surface.blit(game_object.surface, self.game_objects_positions[i])
+			if game_object in self.selected_game_objects:
+				position = self.game_objects_positions[i]
+				self.color_surface.blit(
+					global_vars.POINTER,
+					global_vars.POINTER.get_rect(center=position.midtop))
+
+	def _select_game_objects(self, mouse_position):
+		for i, game_object in enumerate(self.game_objects):
+			cursor_is_on_object = self.game_objects_positions[i].collidepoint(
+				mouse_position[0] - self.surface_position.topleft[0],
+				mouse_position[1] - self.surface_position.topleft[1])
+			if cursor_is_on_object and self.lmb_is_pressed:
+				pygame.mouse.set_cursor(global_vars.CURSOR_SELECT)
+				global_vars.SELECT_SOUND.play()
+				if game_object not in self.selected_game_objects:
+					self.selected_game_objects.append(game_object)
+				else:
+					self.selected_game_objects.remove(game_object)
+
+	def _get_objects_positions(self):
+		game_objects_positions = list()
+		for i, game_object in enumerate(self.game_objects):
+			game_objects_position = game_object.surface.get_rect(topleft=(
+				global_vars.UNIT_WIDTH * i + global_vars.RATIO * 2, self.size[1] / 3))
+			game_objects_positions.append(game_objects_position)
+		return game_objects_positions
 

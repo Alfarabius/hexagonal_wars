@@ -7,6 +7,7 @@ import utils
 class Unit:
 	def __init__(self, power, movement_points, unit_type, name, hexagon=global_vars.game_map.get_random_hex()):
 		self.surface = utils.get_adopted_image(unit_type, global_vars.UNIT_SIZE)
+		self.surface_buffer = self.surface.copy()
 		self.name = name
 		self.occupied_hex = hexagon
 		self.coordinates = self.get_coordinates(self.occupied_hex, self.occupied_hex.get_units_offset_value())
@@ -14,15 +15,8 @@ class Unit:
 		self.is_stacked = False
 		self.power = power
 		self.movement_points = movement_points
-		self.current_power = power
+		self.max_power = power
 		self.current_movement_points = movement_points
-		if name is None:
-			self.parameters_text = global_vars.unit_font.render(
-				''.join(str(power) + ' - ' + str(movement_points)), 1, global_vars.WHITE)
-		else:
-			self.parameters_text = global_vars.unit_font.render(self.name, 1, global_vars.WHITE)
-		self.parameters_position = self.parameters_text.get_rect(center=global_vars.UNIT_PARAM_OFF)
-		self.surface.blit(self.parameters_text, self.parameters_position)
 
 	def write_unit_info(self, surface, x_offset, y_offset):
 		if self.name is None:
@@ -70,7 +64,6 @@ class Unit:
 
 	def select(self):
 		global_vars.SELECT_SOUND.play()
-		pygame.time.wait(250)
 		self.is_selected = True
 
 	def unselect(self):
@@ -83,9 +76,28 @@ class Unit:
 		self.coordinates[1] -= global_vars.UNIT_HEIGHT / 2 - off
 		return self.coordinates
 
+	def draw_parameters(self):
+		if self.name is None:
+			parameters_text = global_vars.unit_font.render(
+				''.join(str(self.power) + ' - ' + str(self.movement_points)), 1, global_vars.WHITE)
+		else:
+			parameters_text = global_vars.unit_font.render(self.name, 1, global_vars.WHITE)
+		parameters_position = parameters_text.get_rect(center=global_vars.UNIT_PARAM_OFF)
+		self.surface = self.surface_buffer.copy()
+		self.surface.blit(parameters_text, parameters_position)
+
 	def appear(self, offset):
+		self.draw_parameters()
 		self.coordinates = self.get_coordinates(self.occupied_hex, offset)
 		global_vars.game_map.screen.map_surface.blit(self.surface, self.coordinates)
 
 	def restore_movement_points(self):
 		self.current_movement_points = self.movement_points
+
+	def eliminate(self):
+		self.power = 0
+
+	def reduce(self):
+		self.power -= self.max_power // 2
+		if self.power < 0 or self.power == 1:
+			self.power = 0
