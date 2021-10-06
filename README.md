@@ -15,14 +15,18 @@ To run it use ``python main.py``
 
 ### Controls
 
-Scroll around the map by ``W`` ``A`` ``S`` ``D`` or ``←`` ``↑`` ``↓`` ``→``.
+Scroll around the map by ``W`` ``A`` ``S`` ``D``.
 
-To select unit use ``LMB``, to move selected unit use ``RMB``
+To select and move unit use ``LMB``, to unselected unit use ``RMB``
+
+Use ``Spacebar`` for coordinated attack.
+
+To end turn you can use ``e`` hotkey or interface button
 
 To exit the game, press ``ESC``.
 
 ### Screenshot
 
 <p align="center">
-  <img src="assets/screen0.png" width="100%" />
+  <img src="assets/screen.png" width="100%" />
 </p>
