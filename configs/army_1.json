@@ -1,0 +1,13 @@
+{
+  "__comment": ["name", "power", "movement"],
+  "parameters": {
+    "tank": ["tank_red", 6, 6],
+    "infantry": ["infantry_red", 2, 4]
+  },
+  "__comment:": ["type", "index_of_hexagon"],
+  "list": [
+    ["tank", 67],
+    ["tank", 66],
+    ["tank", 33]
+  ]
+}
