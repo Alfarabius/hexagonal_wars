@@ -28,7 +28,7 @@ class Combat(State):
 		if not self.supporters_are_selected:
 			return 
 		self._combat_resolve()
-		self._change_to_maneuver_state()
+		self.change_state(maneuver_state.Maneuver(self.game, self.selected_unit))
 
 	def draw(self, surface):
 		for attacker in self.attackers:
@@ -72,12 +72,6 @@ class Combat(State):
 			else:
 				self.__unselect(unit)
 
-	def _change_to_maneuver_state(self):
-		state = maneuver_state.Maneuver(self.game, self.selected_unit)
-		self.game.state = state
-		self.game.add_object(state)
-		self.game.remove_object(self)
-
 	@staticmethod
 	def _retreat_is_possible(hexagon, unit):
 		return unit \
@@ -107,9 +101,6 @@ class Combat(State):
 		for hexagon in self.game.map.hexes:
 			if hexagon.is_point_inside_hexagon(*self.mouse.position, Sizes.MAP_OFFSET):
 				return hexagon
-
-	def unselect_unit(self):
-		pass
 
 	def add_attacker(self, unit):
 		if unit == self.selected_unit:
