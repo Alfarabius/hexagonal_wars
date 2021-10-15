@@ -5,10 +5,15 @@ from on_map_object import Unit
 
 
 class Player:
-	def __init__(self, path, game_map):
+	def __init__(self, path, game_map, timer):
+
 		self.army = pygame.sprite.Group()
 		self.reserve = pygame.sprite.Group()
+
+		self.timer = timer
+
 		self._parse_army(path, game_map)
+
 		self.map_surface = game_map.surface
 
 	def draw(self, surface):
@@ -24,6 +29,7 @@ class Player:
 		for unit in army:
 			parameters = units_dict.get(unit[0])
 			Unit(
+				self.timer,
 				game_map.get_hexagon_by_number(unit[1]),
 				parameters[0],
 				self.army,
