@@ -5,14 +5,14 @@ class State:
 		self.current_hex = None
 		self.selected_player = None
 
-	def start(self):
-		self.game.add_object(self)
-
 	def update(self): ...
 
-	def draw(self, surface):
-		pass
+	def draw(self, surface): ...
 
-	def end(self, next_state):
+	def change_state(self, state):
+		self.game.state = state
+		self.game.add_object(state)
 		self.game.remove_object(self)
-		next_state.start()
+
+	def unselect_unit(self):
+		pass
