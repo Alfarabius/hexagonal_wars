@@ -5,7 +5,7 @@ import utils
 from utils import launch_thread
 
 PLAYLIST = [
-	'music/music_ambient1.ogg'
+	'music/music_ambient1.wav'
 ]
 
 
