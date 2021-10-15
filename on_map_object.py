@@ -214,11 +214,12 @@ class Unit(OnMapObject):
 
 	def _create_container(self) -> list:
 		info = []
-		font = Fonts.INFO
+		font = Fonts.PIXEL_3
 		color = Colors.WHITE
+		name = self.name.split('_')[0]
 		info.append(self._hud_image)
-		info.append(font.render(self.name, False, color))
-		info.append(font.render(''.join('Power: ' + str(self.max_power)), False, color))
-		info.append(font.render(''.join('MP: ' + str(self.movement)), False, color))
-		info.append(font.render(''.join('Attacks: ' + str(self.attacks)), False, color))
+		info.append(font.render(name, False, color))
+		info.append(font.render(''.join('Power   ' + str(self.max_power)), False, color))
+		info.append(font.render(''.join('MP   ' + str(self.movement)), False, color))
+		info.append(font.render(''.join('Attacks   ' + str(self.attacks)), False, color))
 		return info
