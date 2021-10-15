@@ -1,5 +1,6 @@
 import pygame
 
+import constants
 from global_sizes import Sizes
 
 
@@ -28,7 +29,7 @@ class Window:
 
 	def update(self):
 		pygame.display.update()
-		self.clock.tick(64)
+		self.clock.tick(constants.FPS)
 
 	def draw(self, surface):
 		self.surface.fill((100, 100, 120))

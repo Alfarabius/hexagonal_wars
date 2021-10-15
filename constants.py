@@ -2,6 +2,8 @@ from pygame import font
 
 from global_sizes import Sizes
 
+FPS = 60
+
 
 class Fonts:
 	font.init()

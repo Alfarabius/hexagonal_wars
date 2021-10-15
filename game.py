@@ -6,6 +6,7 @@ import combat_table
 import sounds
 import utils
 from choice_state import Choice
+from game_clock import GameClock
 from game_map import Map
 from game_script import GameScript
 from player import Player
@@ -39,7 +40,9 @@ class Game:
 		self.objects: list[GameObject] = []
 
 		self.window = window
+		self.clock = GameClock()
 		self.add_object(self.window)
+		self.add_object(self.clock)
 
 	def start(self):
 		self.is_running = True
@@ -94,11 +97,11 @@ class HexagonalWarGame(Game):
 
 	def _parse_game(self, path):
 		config = utils.json_to_dict(path)
-		self.map = Map(config.get('map', ''))
+		self.map = Map(config.get('map', ''), self.clock)
 		for hexagon in self.map.hexes:
 			hexagon.get_adjacent_hexagons(self.map)
 		for i in range(config.get('players')):
-			self.players.append(Player(config.get('player_' + str(i + 1), ''), self.map))
+			self.players.append(Player(config.get('player_' + str(i + 1), ''), self.map, self.clock))
 		self.name = config.get('name', 'corrupted_name')
 		self.wining_conditions = config.get('wining_conditions', '')
 		self.combat_table = combat_table.CombatTable(config.get('combat_table', ''))
@@ -108,7 +111,7 @@ class HexagonalWarGame(Game):
 				'End Turn',
 				(int(14 * Sizes.RATIO), int(5 * Sizes.RATIO)),
 				(Sizes.RATIO * 13.1, Sizes.HEIGHT_RATIO * 85),
-				(200, 100, 100),
+				(140, 30, 30),
 				pygame.K_e,
 				self.end_turn
 			)],
@@ -165,13 +168,13 @@ class HexagonalWarGame(Game):
 
 
 class PygameEventHandler:
-	def __init__(self, quit_function):
-		self.quit_function = quit_function
+	def __init__(self, function):
+		self.function = function
 
 	def update(self):
 		for event in pygame.fastevent.get():
 			if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-				self.quit_function()
+				self.function()
 
 	def draw(self, surface):
 		pass

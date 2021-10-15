@@ -4,7 +4,6 @@ import pygame
 
 from pygame import sprite
 
-import constants
 import sounds
 import utils
 from global_sizes import Sizes
@@ -17,7 +16,7 @@ UNIT_SIZE = (UNIT_WIDTH, UNIT_HEIGHT)
 
 class OnMapObject(sprite.Sprite):
 
-	def __init__(self, hexagon, path: str, group: sprite.Group):
+	def __init__(self, hexagon, path: str, group: sprite.Group, timer):
 		# parent init
 		super().__init__(group)
 
@@ -30,6 +29,8 @@ class OnMapObject(sprite.Sprite):
 		self.image_buffer = self.image.copy()
 		self._hud_image = self.image.copy()
 		self.rect = self.image.get_rect(center=self.occupied_hexagon.position)
+
+		self.timer = timer
 
 	def draw(self, surface):
 		surface.blit(self.image, self.rect)
@@ -70,9 +71,9 @@ class Unit(OnMapObject):
 	PATH = 'assets/'
 	DIRECTIONS = ['right', 'left']
 	STATES = ['move', 'attack', 'idle']
-	SPEED = 0.2
+	SPEED = 12
 
-	def __init__(self, hexagon, name: str, group: sprite.Group, power: int, movement: int, direction: int):
+	def __init__(self, timer, hexagon, name: str, group: sprite.Group, power: int, movement: int, direction: int):
 		# states
 		self.is_alive = True
 		# 'move', 'attack', 'idle'
@@ -82,7 +83,7 @@ class Unit(OnMapObject):
 		self.path = self.PATH + name + '/'
 
 		path = self.path + self.state + '_' + self.direction + '/' + 'idle1' + self.direction[0]
-		super().__init__(hexagon, path, group)
+		super().__init__(hexagon, path, group, timer)
 
 		# parameters
 		self.attacks = 1
@@ -98,22 +99,25 @@ class Unit(OnMapObject):
 		self.animations = Animations(self.path, self.name)
 		self.animation_frames = self.animations.get(self.state + '_' + self.direction)
 		self.current_frame = 0
+		self.current_speed = self.SPEED * self.timer.dt
 
 	def update(self):
 		if not self.is_alive:
 			self.eliminate()
 
+		self.current_speed = self.SPEED * self.timer.dt
+
 		self.info = self._create_container()
 
-		if self.state == 'attack' and self.current_frame + self.SPEED >= len(self.animation_frames):
-			self.change_frame(self.SPEED)
+		if self.state == 'attack' and self.current_frame + self.current_speed >= len(self.animation_frames):
+			self.change_frame(self.current_speed)
 			self.stop()
 
-		self.change_frame(self.SPEED)
+		self.change_frame(self.current_speed)
 		self.image = self.image_buffer
 
 		if self.state == 'move':
-			self.change_position(Sizes.RATIO / 5)
+			self.change_position(Sizes.RATIO * 10 * self.timer.dt)
 		else:
 			self.rect.center = self.occupied_hexagon.position
 

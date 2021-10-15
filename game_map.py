@@ -20,9 +20,9 @@ class Map:
 	HEX_EDGE = Sizes.RATIO * 3
 	HEX_SIZE = (HEX_EDGE * 2, HEX_EDGE * math.sqrt(3))
 	HEX_SIZE_INT = (int(HEX_SIZE[0]), int(HEX_SIZE[1]))
-	SCROLL_SPEED = int(HEX_EDGE // 4)
+	SCROLL_SPEED = int(HEX_EDGE * 6)
 
-	def __init__(self, path):
+	def __init__(self, path, timer):
 		self.spaces = []
 		self.fov_top_left = [0, 0]
 		self._parse_map(path)
@@ -35,6 +35,9 @@ class Map:
 		self.surface = pygame.Surface((int(self.width),	int(self.height)))
 		self.rect = self.surface.get_rect(topleft=(25 * Sizes.RATIO, 0))
 
+		self.timer = timer
+
+		self.scroll_speed = self.SCROLL_SPEED * self.timer.dt
 		self.scroll_lock = False
 
 	def _parse_map(self, path):
@@ -61,6 +64,7 @@ class Map:
 	def update(self):
 		if self.scroll_lock:
 			return
+		self.scroll_speed = self.SCROLL_SPEED * self.timer.dt
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_LEFT] or keys[pygame.K_a]:
 			self._scroll_to_direction((1, 0))
@@ -125,9 +129,9 @@ class Map:
 
 	def _scroll_to_direction(self, direction):
 		if self._scroll_is_possible(direction):
-			self._make_scroll_buffer(self.SCROLL_SPEED * direction[0], self.SCROLL_SPEED * direction[1])
-			self.fov_top_left[0] -= self.SCROLL_SPEED * direction[0]
-			self.fov_top_left[1] -= self.SCROLL_SPEED * direction[1]
+			self._make_scroll_buffer(self.scroll_speed * direction[0], self.scroll_speed * direction[1])
+			self.fov_top_left[0] -= self.scroll_speed * direction[0]
+			self.fov_top_left[1] -= self.scroll_speed * direction[1]
 
 	def lock_scroll(self):
 		self.scroll_lock = True
