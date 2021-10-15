@@ -5,7 +5,9 @@ import pygame
 import combat_table
 import sounds
 import utils
+from choice_state import Choice
 from game_map import Map
+from game_script import GameScript
 from player import Player
 from button import Button
 from global_sizes import Sizes
@@ -79,7 +81,7 @@ class HexagonalWarGame(Game):
 		self.state = Maneuver(self)
 
 		self.add_object(ContainersHandler(self))
-		self.add_object(PygameEventHandler(self.quit))
+		self.add_object(PygameEventHandler(self.pause))
 		self.add_object(self.map)
 		self.add_object(self.interface)
 		self.add_object(self.state)
@@ -87,6 +89,8 @@ class HexagonalWarGame(Game):
 			self.add_object(player)
 
 		self.current_player = self.players[0]
+
+		self.add_object(GameScript(self))
 
 	def _parse_game(self, path):
 		config = utils.json_to_dict(path)
@@ -122,6 +126,28 @@ class HexagonalWarGame(Game):
 		self.current_player = self.get_opposite_player()
 		self.state.unselect_unit()
 
+	def pause(self):
+		if self.state.__class__.__name__ == 'Choice':
+			return
+		pause_menu = Choice(
+			self,
+			None,
+			'Pause',
+			{
+				'Resume': [self.change_state, [self.state]],
+				'Settings': [utils.plug, None],
+				'Save Game': [utils.plug, None],
+				'Load Game': [utils.plug, None],
+				'Exit': [self.quit, None]
+			}
+		)
+		self.change_state(pause_menu)
+
+	def change_state(self, state):
+		self.remove_object(self.state)
+		self.state = state
+		self.add_object(state)
+
 	def get_opposite_player(self) -> Player:
 		return self.players[self.players.index(self.current_player) - 1]
 
@@ -129,7 +155,13 @@ class HexagonalWarGame(Game):
 		if self.wining_conditions == 'deathmatch':
 			for player in self.players:
 				if not player.army.sprites():
-					self.quit()
+					ind = self.players.index(player)
+					self.change_state(Choice(
+						self,
+						None,
+						f'Player {abs(ind - 1) + 1}\nwin!',
+						{'Hurrah!': [self.quit, None]}
+					))
 
 
 class PygameEventHandler:
