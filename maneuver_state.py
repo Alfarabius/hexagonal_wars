@@ -36,7 +36,7 @@ class Maneuver(State):
 		if not self.current_hex_line or not self.current_hex:
 			return
 		for hexagon in self.current_hex_line:
-			if hexagon.container.unit is None:
+			if hexagon is not None and hexagon.container.unit is None:
 				hexagon.draw_midpoint(self.game.map.surface,  Sizes.RATIO // 3, Colors.INFO)
 		if self.current_hex is not None and self.current_hex.container.unit is None:
 			self.current_hex.draw_midpoint(self.game.map.surface, Sizes.RATIO // 2, Colors.WHITE)
@@ -73,28 +73,22 @@ class Maneuver(State):
 				self.cursor_name = 'SELECT'
 
 	def movement_handler(self):
-		if self.selected_unit and self.selected_unit.state == 'idle':
-			self.game.map.unlock_scroll()
 		if self._movement_is_possible():
 			self.mouse.lmb_reaction(self._movement_que_maker, None)
-			self.game.map.lock_scroll() if self.selected_unit.state == 'move' else None
 			return
 		else:
 			self.mouse.rmb_reaction(self.unselect_unit, None)
 
 	def _state_change_checker(self):
 		if self._attack_is_possible():
-			self.mouse.lmb_reaction(self._change_to_combat_state, self.current_hex.container.unit)
+			self.mouse.lmb_reaction(
+				self.change_state,
+				combat_state.Combat(self.game, self.selected_unit, self.current_hex.container.unit)
+			)
 
 	def unselect_unit(self):
 		sounds.SOUNDS.select.play()
 		self.selected_unit = None
-
-	def _change_to_combat_state(self, target):
-		state = combat_state.Combat(self.game, self.selected_unit, target)
-		self.game.state = state
-		self.game.add_object(state)
-		self.game.remove_object(self)
 
 	def _attack_is_possible(self):
 		enemy_unit = self.current_hex.container.unit if self.current_hex else None
@@ -110,6 +104,8 @@ class Maneuver(State):
 			return False
 		hex_line = []
 		for hexagon in self.current_hex_line:
+			if hexagon is None:
+				continue
 			hex_line.append(
 				hexagon.container.unit is None
 				and hexagon.container.is_passable()
@@ -134,21 +130,24 @@ class Maneuver(State):
 
 class MovementQue:
 	def __init__(self, unit, hexagons: list, state):
-		print(hexagons)
 		self.unit = unit
 		self.hexagons = tuple(hexagons)
 		self.index = 0
 		self.state = state
+		self.state.game.map.lock_scroll()
 		self.unit.move(self.hexagons[self.index])
 
 	def update(self):
-		if self.hexagons[self.index] == self.hexagons[-1]:
-			self.state.kill_que(self)
-
 		rounded_position = (
 			int(self.hexagons[self.index].position[0]),
 			int(self.hexagons[self.index].position[1])
 		)
+
+		if self.hexagons[self.index] == self.hexagons[-1] \
+			and self.unit.rect.center == rounded_position:
+			self.state.game.map.unlock_scroll()
+			self.state.kill_que(self)
+			return
 
 		if self.unit.rect.center == rounded_position:
 			self.index += 1

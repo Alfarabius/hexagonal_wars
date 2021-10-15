@@ -1,6 +1,5 @@
 from typing import Optional
 
-import pygame.mouse
 from pygame import Surface
 
 import button
@@ -33,8 +32,7 @@ class HUD:
 
 	def update(self):
 		for _button in self.buttons:
-			_button.click_handler(pygame.mouse.get_pos(), pygame.mouse.get_pressed(3)[0])
-			_button.hotkey_handler()
+			_button.update()
 		self.surface = self.surface_buffer
 
 	def draw(self, surface: Surface):
@@ -50,11 +48,11 @@ class HUD:
 		self.__draw_containers(surface, self.container.get('mid', 'error'), self.mid_room_position)
 
 	@staticmethod
-	def __draw_containers(surface, information, position):
+	def __draw_containers(surface, information: list[Surface, ...], position):
 		if information is None:
 			return
-		step, i = Sizes.RATIO * 3, 0
+		step = 0
 		for info in information:
-			rect = info.get_rect(center=(position[0], position[1] + step * i))
+			rect = info.get_rect(center=(position[0], position[1] + step))
+			step += info.get_height()
 			surface.blit(info, rect)
-			i += 1

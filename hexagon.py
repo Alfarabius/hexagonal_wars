@@ -150,9 +150,8 @@ class Hexagon:
 
 	def _create_container(self) -> list:
 		container = []
-		font = Fonts.INFO
+		font = Fonts.PIXEL_3
 		color = Colors.DARK_GREEN
 		container.append(self.container.image)
-		container.append(font.render(''.join(str('Type: ' + self.container.terrain.type)), True, color))
-
+		container.append(font.render(''.join(str('Type   ' + self.container.terrain.type)), True, color))
 		return container

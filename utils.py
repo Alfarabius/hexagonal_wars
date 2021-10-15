@@ -87,7 +87,10 @@ def ignore_exception(func):
 	def inner(args):
 		value = None
 		try:
-			value = func(*args)
+			if args is None:
+				func()
+			else:
+				value = func(*args)
 		except Exception as error:
 			print(f'Exception {error} was ignored')
 		return value
@@ -115,4 +118,8 @@ def cube_round(cube):
 		rz = -rx - ry
 
 	return rx, ry, rz
+
+
+def plug():
+	pass
 
