@@ -1,6 +1,7 @@
 import pygame
 import pygame.mixer as mixer
 
+import utils
 from utils import launch_thread
 
 PLAYLIST = [
@@ -19,6 +20,7 @@ class MusicPlayer:
 		return cls.__instance
 
 	def __init__(self, playlist, volume):
+		mixer.init()
 		self.playlist = playlist
 		self.volume = volume
 
@@ -35,7 +37,7 @@ class MusicPlayer:
 			music = self._get_next_track(self.playlist)
 			mixer.music.load(music)
 			mixer.music.set_volume(self.volume)
-			mixer.music.play()
+			utils.ignore_exception(mixer.music.play)(None)
 
 	def launch_thread(self):
 		launch_thread(self._music_loop_play)
