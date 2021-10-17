@@ -41,3 +41,11 @@ class Player:
 	def restore(self):
 		for unit in self.army:
 			unit.restore()
+
+	def get_next_unit(self, unit):
+		if unit is None and self.army:
+			return self.army.sprites()[0]
+		index = self.army.sprites().index(unit) + 1
+		if index >= len(self.army):
+			index = 0
+		return self.army.sprites()[index]

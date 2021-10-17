@@ -5,18 +5,13 @@ import pygame
 from pygame import sprite
 
 import sounds
-import utils
 from global_sizes import Sizes
 from constants import Colors, Fonts
-
-UNIT_WIDTH = int(4.5 * Sizes.RATIO)
-UNIT_HEIGHT = int(4.5 * Sizes.RATIO)
-UNIT_SIZE = (UNIT_WIDTH, UNIT_HEIGHT)
 
 
 class OnMapObject(sprite.Sprite):
 
-	def __init__(self, hexagon, path: str, group: sprite.Group, timer):
+	def __init__(self, hexagon, path: str, group: sprite.Group, timer, name):
 		# parent init
 		super().__init__(group)
 
@@ -25,7 +20,7 @@ class OnMapObject(sprite.Sprite):
 		self.occupied_hexagon.container.add_unit(self)
 
 		# view
-		self.image = utils.get_adopted_image(path, UNIT_SIZE)
+		self.image = pygame.image.load(path + '.png').convert_alpha()
 		self.image_buffer = self.image.copy()
 		self._hud_image = self.image.copy()
 		self.rect = self.image.get_rect(center=self.occupied_hexagon.position)
@@ -49,9 +44,19 @@ class OnMapObject(sprite.Sprite):
 
 class Animations(dict):
 	animations: dict[str: (str, ...), ...]
+	__instances = []
+
+	def __new__(cls, *args, **kwargs):
+		for instance in cls.__instances:
+			if args[1] == instance.name:
+				return instance
+		new_instance = super(Animations, cls).__new__(cls)
+		cls.__instances.append(new_instance)
+		return new_instance
 
 	def __init__(self, path: str, name: str):
 		animations = dict()
+		self.name = name
 
 		try:
 			keys = os.listdir(path)
@@ -62,7 +67,7 @@ class Animations(dict):
 			files = os.listdir(path + key)
 			image = []
 			for file in files:
-				image.append(utils.get_adopted_image_format('/'.join((path, key, file)), UNIT_SIZE))
+				image.append(pygame.image.load('/'.join((path, key, file))).convert_alpha())
 			animations.update({key: image})
 		super().__init__(animations)
 
@@ -83,7 +88,7 @@ class Unit(OnMapObject):
 		self.path = self.PATH + name + '/'
 
 		path = self.path + self.state + '_' + self.direction + '/' + 'idle1' + self.direction[0]
-		super().__init__(hexagon, path, group, timer)
+		super().__init__(hexagon, path, group, timer, name)
 
 		# parameters
 		self.attacks = 1
@@ -100,6 +105,9 @@ class Unit(OnMapObject):
 		self.animation_frames = self.animations.get(self.state + '_' + self.direction)
 		self.current_frame = 0
 		self.current_speed = self.SPEED * self.timer.dt
+
+		# sounds
+		self.move_sound = sounds.SOUNDS.march if self.name[0] == 'i' else sounds.SOUNDS.move
 
 	def update(self):
 		if not self.is_alive:
@@ -123,7 +131,7 @@ class Unit(OnMapObject):
 
 	def move(self, hexagon):
 		self.state = 'move'
-		sounds.SOUNDS.move.play()
+		self.move_sound.play()
 		self.movement -= 1
 
 		self.turning_checker(hexagon)
@@ -219,7 +227,7 @@ class Unit(OnMapObject):
 	def _create_container(self) -> list:
 		info = []
 		font = Fonts.PIXEL_3
-		color = Colors.WHITE
+		color = Colors.INFO
 		name = self.name.split('_')[0]
 		info.append(self._hud_image)
 		info.append(font.render(name, False, color))

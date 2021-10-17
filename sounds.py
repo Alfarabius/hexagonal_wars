@@ -9,6 +9,7 @@ class Sounds:
 		self.button = self._setup_sound('sounds/button.wav')
 		self.select = self._setup_sound('sounds/select.wav')
 		self.move = self._setup_sound('sounds/tracked_move.wav')
+		self.march = self._setup_sound('sounds/inf_move.wav')
 		self.attack = self._setup_sound('sounds/attack.wav')
 		self.wrong = self._setup_sound('sounds/wrong.wav')
 

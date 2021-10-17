@@ -39,10 +39,14 @@ class Interface:
 class KeyboardInput:
 	def __init__(self):
 		self.pressed_keys = key.get_pressed()
+		self.key_pressed = False
 
-	def handler(self, current_key, function):
+	def handler(self, current_key, function, args):
 		if self.pressed_keys[current_key]:
-			function()
+			self.key_pressed = True
+		elif self.key_pressed:
+			self.key_pressed = False
+			return function(*args)
 
 	def update(self):
 		self.pressed_keys = key.get_pressed()
@@ -71,18 +75,18 @@ class MouseInput:
 	def set_cursor(self, cursor_type):
 		mouse.set_cursor(self.CURSORS.get(cursor_type))
 
-	def lmb_reaction(self, function, arg):
+	def lmb_reaction(self, function, args):
 		if self.buttons[0]:
 			self.lmb_is_pressed = True
 		elif self.lmb_is_pressed:
-			function(arg) if arg is not None else function()
+			function(*args) if args is not None else function()
 			self.lmb_is_pressed = False
 
-	def rmb_reaction(self, function, arg):
+	def rmb_reaction(self, function, args):
 		if self.buttons[2]:
 			self.rmb_is_pressed = True
 		elif self.rmb_is_pressed:
-			function(arg) if arg is not None else function()
+			function(*args) if args is not None else function()
 			self.rmb_is_pressed = False
 
 	def get_position(self) -> tuple[int, int]:

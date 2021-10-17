@@ -3,9 +3,11 @@ import sys
 import pygame
 
 import combat_table
+import constants
 import sounds
 import utils
 from choice_state import Choice
+from constants import Fonts, Colors
 from game_clock import GameClock
 from game_map import Map
 from game_script import GameScript
@@ -35,14 +37,23 @@ class Game:
 		return cls.__instance
 
 	def __init__(self, window):
+		# states
 		self.is_running = False
 
+		# lis of GameObjects
 		self.objects: list[GameObject] = []
 
+		# objects
 		self.window = window
 		self.clock = GameClock()
 		self.add_object(self.window)
 		self.add_object(self.clock)
+
+		# container (hud)
+		self.game_info = None
+
+	def __del__(self):
+		pass
 
 	def start(self):
 		self.is_running = True
@@ -77,6 +88,7 @@ class HexagonalWarGame(Game):
 	def __init__(self, path, window):
 		self.turn = 0
 		self.players: list[Player] = []
+		self.path = path
 
 		super().__init__(window)
 		self._parse_game(path)
@@ -84,10 +96,10 @@ class HexagonalWarGame(Game):
 		self.state = Maneuver(self)
 
 		self.add_object(ContainersHandler(self))
-		self.add_object(PygameEventHandler(self.pause))
+		self.add_object(PygameEventHandler(self.pause, self.window))
 		self.add_object(self.map)
-		self.add_object(self.interface)
 		self.add_object(self.state)
+		self.add_object(self.interface)
 		for player in self.players:
 			self.add_object(player)
 
@@ -119,7 +131,7 @@ class HexagonalWarGame(Game):
 		)
 
 	def end_turn(self):
-		if self.state.__class__.__name__ == 'Combat':
+		if self.state.__class__.__name__ == 'Combat' or self.state.__class__.__name__ == 'Choice':
 			sounds.SOUNDS.wrong.play()
 			return
 		self._wining_condition_checker()
@@ -163,18 +175,48 @@ class HexagonalWarGame(Game):
 						self,
 						None,
 						f'Player {abs(ind - 1) + 1}\nwin!',
-						{'Hurrah!': [self.quit, None]}
+						{
+							'Exit': [self.quit, None],
+							'Restart': [self.restart_game, None],
+							'Load Game': [utils.plug, None],
+						}
 					))
+
+	def create_container(self) -> list:
+		info = []
+		font = Fonts.PIXEL_3
+		color = Colors.FILL
+		info.append(Fonts.PIXEL_3_TITLE.render(self.name, False, Colors.SELECT))
+		info.append(font.render(''.join('Turn   ' + str(self.turn)), False, color))
+		info.append(font.render(''.join('Type   ' + str(self.wining_conditions)), False, color))
+		info.append(font.render(''.join('State   ' + str(self.state.__class__.__name__)), False, color))
+		return info
+
+	def restart_game(self):
+		game_window = self.window
+		path = self.path
+		new_game = HexagonalWarGame(path, game_window)
+		new_game.turn = 1
+		new_game.start()
 
 
 class PygameEventHandler:
-	def __init__(self, function):
+	def __init__(self, function, window):
 		self.function = function
+		self.window = window
 
 	def update(self):
 		for event in pygame.fastevent.get():
 			if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
 				self.function()
+			if event.type == pygame.VIDEORESIZE:
+				self.window.surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+				self.window.fullscreen = not self.window.fullscreen
+				if self.window.fullscreen:
+					self.window.surface = pygame.display.set_mode((self.window.width, self.window.height), pygame.FULLSCREEN)
+				else:
+					self.window.surface = pygame.display.set_mode((self.window.__class__.W, self.window.__class__.H), pygame.RESIZABLE)
 
 	def draw(self, surface):
 		pass
@@ -188,11 +230,14 @@ class ContainersHandler:
 		self.game = game
 
 	def update(self):
+		self.game.game_info = self.game.create_container()
 		self.unit_info = self.game.state.selected_unit.info if self.game.state.selected_unit else None
 		self.hexagon_info = self.game.state.current_hex.info if self.game.state.current_hex else None
 		container = {}
-		container.update({'top': self.unit_info})
-		container.update({'mid': self.hexagon_info})
+		top_content = self.unit_info if self.unit_info else self.game.game_info
+		mid_content = self.hexagon_info if self.hexagon_info else constants.HOTKEYS
+		container.update({'top': top_content})
+		container.update({'mid': mid_content})
 		self.hud.set_container(container)
 
 	def draw(self, surface):

@@ -13,4 +13,5 @@ class CombatTable:
 		elif diff > 7:
 			return 'DD'
 		column = self.content.get(str(diff))
+		print(column.get(str(die_roll)))
 		return column.get(str(die_roll))
