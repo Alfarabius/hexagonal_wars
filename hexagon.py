@@ -2,13 +2,12 @@ import math
 
 import pygame
 
-import utils
+from utils import FORMAT
 from constants import Fonts, Colors
 from global_sizes import Sizes
 from on_map_object import Unit
 
-HEX_EDGE = Sizes.RATIO * 3
-HEX_SIZE = (HEX_EDGE * 2.0, HEX_EDGE * math.sqrt(3.0))
+HEX_EDGE = Sizes.HEX_EDGE
 RADIAN = math.pi / 180
 TYPES = {
 		'flat_topped': (0, math.sqrt(3), 2),
@@ -32,10 +31,10 @@ class Terrain:
 class Space:
 	PATH = 'assets/terrain/'
 
-	def __init__(self, terrain: Terrain, size: tuple):
+	def __init__(self, terrain: Terrain):
 		self.terrain = terrain
 
-		self.image = utils.get_adopted_image(self.PATH + self.terrain.type, size)
+		self.image = pygame.image.load(self.PATH + self.terrain.type + FORMAT).convert_alpha()
 		self.rect = self.image.get_rect()
 
 		self.unit = None
@@ -102,7 +101,6 @@ class Hexagon:
 		dy = abs(self.position[1] - y) / self.height
 		a = 0.29 * math.sqrt(3.0)
 		return dy <= a and (a * dx + 0.25 * dy) <= 0.57 * a
-		# (new_x - self.position[0])**2 + (y - self.position[1])**2 < (self.height / 2)**2
 
 	def distance_to_hex(self, hexagon) -> int:
 		coordinate = list()

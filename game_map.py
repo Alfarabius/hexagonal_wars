@@ -17,10 +17,8 @@ HEX_EDGES = {
 
 
 class Map:
-	HEX_EDGE = Sizes.RATIO * 3
-	HEX_SIZE = (HEX_EDGE * 2, HEX_EDGE * math.sqrt(3))
-	HEX_SIZE_INT = (int(HEX_SIZE[0]), int(HEX_SIZE[1]))
-	SCROLL_SPEED = int(HEX_EDGE * 6)
+	HEX_EDGE = Sizes.HEX_EDGE + 2
+	SCROLL_SPEED = int(HEX_EDGE * 8)
 
 	def __init__(self, path, timer):
 		self.spaces = []
@@ -57,7 +55,7 @@ class Map:
 						(j, i),
 						edge,
 						self.type,
-						Space(Terrain(self.spaces[i * self.size[0] + j]), self.HEX_SIZE_INT))
+						Space(Terrain(self.spaces[i * self.size[0] + j])))
 				)
 		return hexes
 
