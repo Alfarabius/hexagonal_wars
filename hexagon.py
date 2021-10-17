@@ -138,6 +138,10 @@ class Hexagon:
 	def draw_midpoint(self, surface, size, color):
 		pygame.draw.circle(surface, color, self.position, size)
 
+	def draw_surface_midpoint(self, target_surface: pygame.Surface, surface: pygame.Surface):
+		rect = surface.get_rect(center=self.position)
+		target_surface.blit(surface, rect)
+
 	def change_hex_position(self, offset_x, offset_y) -> tuple[float, float]:
 		new_x_position = self.position[0] + offset_x
 		new_y_position = self.position[1] + offset_y
@@ -149,7 +153,7 @@ class Hexagon:
 	def _create_container(self) -> list:
 		container = []
 		font = Fonts.PIXEL_3
-		color = Colors.DARK_GREEN
+		color = Colors.INFO
 		container.append(self.container.image)
 		container.append(font.render(''.join(str('Type   ' + self.container.terrain.type)), True, color))
 		return container

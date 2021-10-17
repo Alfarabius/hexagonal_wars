@@ -227,7 +227,7 @@ class Unit(OnMapObject):
 	def _create_container(self) -> list:
 		info = []
 		font = Fonts.PIXEL_3
-		color = Colors.WHITE
+		color = Colors.INFO
 		name = self.name.split('_')[0]
 		info.append(self._hud_image)
 		info.append(font.render(name, False, color))

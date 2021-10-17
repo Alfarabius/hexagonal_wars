@@ -3,9 +3,11 @@ import sys
 import pygame
 
 import combat_table
+import constants
 import sounds
 import utils
 from choice_state import Choice
+from constants import Fonts, Colors
 from game_clock import GameClock
 from game_map import Map
 from game_script import GameScript
@@ -35,14 +37,20 @@ class Game:
 		return cls.__instance
 
 	def __init__(self, window):
+		# states
 		self.is_running = False
 
+		# lis of GameObjects
 		self.objects: list[GameObject] = []
 
+		# objects
 		self.window = window
 		self.clock = GameClock()
 		self.add_object(self.window)
 		self.add_object(self.clock)
+
+		# container (hud)
+		self.game_info = None
 
 	def __del__(self):
 		pass
@@ -90,8 +98,8 @@ class HexagonalWarGame(Game):
 		self.add_object(ContainersHandler(self))
 		self.add_object(PygameEventHandler(self.pause, self.window))
 		self.add_object(self.map)
-		self.add_object(self.interface)
 		self.add_object(self.state)
+		self.add_object(self.interface)
 		for player in self.players:
 			self.add_object(player)
 
@@ -174,6 +182,16 @@ class HexagonalWarGame(Game):
 						}
 					))
 
+	def create_container(self) -> list:
+		info = []
+		font = Fonts.PIXEL_3
+		color = Colors.FILL
+		info.append(Fonts.PIXEL_3_TITLE.render(self.name, False, Colors.SELECT))
+		info.append(font.render(''.join('Turn   ' + str(self.turn)), False, color))
+		info.append(font.render(''.join('Type   ' + str(self.wining_conditions)), False, color))
+		info.append(font.render(''.join('State   ' + str(self.state.__class__.__name__)), False, color))
+		return info
+
 	def restart_game(self):
 		game_window = self.window
 		path = self.path
@@ -212,11 +230,14 @@ class ContainersHandler:
 		self.game = game
 
 	def update(self):
+		self.game.game_info = self.game.create_container()
 		self.unit_info = self.game.state.selected_unit.info if self.game.state.selected_unit else None
 		self.hexagon_info = self.game.state.current_hex.info if self.game.state.current_hex else None
 		container = {}
-		container.update({'top': self.unit_info})
-		container.update({'mid': self.hexagon_info})
+		top_content = self.unit_info if self.unit_info else self.game.game_info
+		mid_content = self.hexagon_info if self.hexagon_info else constants.HOTKEYS
+		container.update({'top': top_content})
+		container.update({'mid': mid_content})
 		self.hud.set_container(container)
 
 	def draw(self, surface):

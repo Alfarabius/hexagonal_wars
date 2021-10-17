@@ -13,6 +13,8 @@ class State:
 		self.game.state = state
 		self.game.add_object(state)
 		self.game.remove_object(self)
+		self.game.remove_object(self.game.interface)
+		self.game.add_object(state.game.interface)
 
 	def unselect_unit(self):
 		pass

@@ -75,7 +75,7 @@ class Map:
 
 	def draw(self, surface):
 		surface.blit(self.surface, self.rect)
-		self.surface.fill((150, 200, 150))
+		self.surface.fill((200, 200, 150))
 		for hexagon in self.hexes:
 			hexagon.draw(self.surface)
 
@@ -105,6 +105,20 @@ class Map:
 		for i in range(length):
 			hexagons.append(self.get_hexagon_by_cube(self._cube_lerp(hex1, hex2, 1.0 / length * i)))
 		return hexagons
+
+	def reachable_hexagons(self, start_hexagon, movement):
+		hexagons = set()
+		hexagons.add(start_hexagon)
+		neighbors = [[start_hexagon]]
+
+		for i in range(1, movement + 1):
+			neighbors.append([])
+			for hexagon in neighbors[i - 1]:
+				for neighbor in self.get_adjacent_hexes(hexagon):
+					if neighbor not in hexagons and neighbor.container.terrain.is_passable:
+						hexagons.add(neighbor)
+						neighbors[i].append(neighbor)
+		return list(hexagons)
 
 	def _make_scroll_buffer(self, offset_x, offset_y):
 		for hexagon in self.hexes:

@@ -39,10 +39,14 @@ class Interface:
 class KeyboardInput:
 	def __init__(self):
 		self.pressed_keys = key.get_pressed()
+		self.key_pressed = False
 
-	def handler(self, current_key, function):
+	def handler(self, current_key, function, args):
 		if self.pressed_keys[current_key]:
-			function()
+			self.key_pressed = True
+		elif self.key_pressed:
+			self.key_pressed = False
+			return function(*args)
 
 	def update(self):
 		self.pressed_keys = key.get_pressed()
