@@ -70,6 +70,7 @@ class Combat(State):
 					unit.retreat(hexagon)
 					break
 			else:
+				unit.destroy()
 				self.__unselect(unit)
 
 	@staticmethod
@@ -86,16 +87,22 @@ class Combat(State):
 			self.selected_unit = None
 
 	def _select_supporters(self):
-		if pygame.key.get_pressed()[pygame.K_SPACE] or self.possible_attackers_amount == 1:
-			self.supporters_are_selected = True
+		self.mouse.rmb_reaction(self.change_state, [maneuver_state.Maneuver(self.game, self.selected_unit)])
+		if pygame.key.get_pressed()[pygame.K_SPACE] or \
+			self.possible_attackers_amount == 1:
+			self._complete_supporters_selection()
+		elif self.target.occupied_hexagon == self.current_hex:
+			self.cursor = utils.ignore_exception(self.mouse.set_cursor)(['ATTACK'])
+			self.mouse.lmb_reaction(self._complete_supporters_selection, None)
+			return
 		self.cursor = utils.ignore_exception(self.mouse.set_cursor)(['MOVE'])
 		for unit in self.game.current_player.army:
 			if unit.occupied_hexagon.is_adjacent(self.target.occupied_hexagon) \
 				and unit.attacks > 0 \
 				and unit.is_unit_inside_hexagon(self.current_hex):
 				self.cursor = utils.ignore_exception(self.mouse.set_cursor)(['SELECT'])
-				self.mouse.lmb_reaction(self.add_attacker, unit)
-				self.mouse.rmb_reaction(self.remove_attacker, unit)
+				self.mouse.lmb_reaction(self.add_attacker, [unit])
+				self.mouse.rmb_reaction(self.remove_attacker, [unit])
 
 	def _get_current_hex(self):
 		for hexagon in self.game.map.hexes:
@@ -121,3 +128,6 @@ class Combat(State):
 				and unit.attacks > 0:
 				count += 1
 		return count
+
+	def _complete_supporters_selection(self):
+		self.supporters_are_selected = True
