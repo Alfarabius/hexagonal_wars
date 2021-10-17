@@ -8,6 +8,7 @@
   "list": [
     ["tank", 67],
     ["tank", 66],
-    ["tank", 33]
+    ["tank", 33],
+    ["infantry", 34]
   ]
 }
