@@ -5,6 +5,9 @@ from global_sizes import Sizes
 
 
 class Window:
+	W = 640
+	H = 480
+
 	__instance = None
 
 	def __new__(cls, *args, **kwargs):
@@ -15,16 +18,30 @@ class Window:
 		return cls.__instance
 
 	def __init__(self, name, flags):
+
+		# name
+		self.name = name
+
+		# clock
 		self.clock = pygame.time.Clock()
+
+		# size
 		self.width = Sizes.DISPLAY_INFO.current_w
 		self.height = Sizes.DISPLAY_INFO.current_h
 		self.size = (self.width, self.height)
-		self.surface = self._get_window(name, flags)
+
+		# surface
+		self.surface = self.get_window(flags)
+
+		# points
 		self.middle_point = (self.width / 2, self.height / 2)
 		self.zero_point = (0, 0)
 
-	def _get_window(self, name, flags) -> pygame.Surface:
-		pygame.display.set_caption(name)
+		# states
+		self.fullscreen = True
+
+	def get_window(self, flags) -> pygame.Surface:
+		pygame.display.set_caption(self.name)
 		return pygame.display.set_mode(self.size, flags)
 
 	def update(self):

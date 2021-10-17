@@ -4,7 +4,7 @@ import pygame.mixer as mixer
 import utils
 from utils import launch_thread
 
-PLAYLIST = [
+PLAYLIST = [ 
 	'music/music_ambient1.wav'
 ]
 

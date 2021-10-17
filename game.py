@@ -44,6 +44,9 @@ class Game:
 		self.add_object(self.window)
 		self.add_object(self.clock)
 
+	def __del__(self):
+		pass
+
 	def start(self):
 		self.is_running = True
 		while self.is_running:
@@ -77,6 +80,7 @@ class HexagonalWarGame(Game):
 	def __init__(self, path, window):
 		self.turn = 0
 		self.players: list[Player] = []
+		self.path = path
 
 		super().__init__(window)
 		self._parse_game(path)
@@ -84,7 +88,7 @@ class HexagonalWarGame(Game):
 		self.state = Maneuver(self)
 
 		self.add_object(ContainersHandler(self))
-		self.add_object(PygameEventHandler(self.pause))
+		self.add_object(PygameEventHandler(self.pause, self.window))
 		self.add_object(self.map)
 		self.add_object(self.interface)
 		self.add_object(self.state)
@@ -119,7 +123,7 @@ class HexagonalWarGame(Game):
 		)
 
 	def end_turn(self):
-		if self.state.__class__.__name__ == 'Combat':
+		if self.state.__class__.__name__ == 'Combat' or self.state.__class__.__name__ == 'Choice':
 			sounds.SOUNDS.wrong.play()
 			return
 		self._wining_condition_checker()
@@ -163,18 +167,38 @@ class HexagonalWarGame(Game):
 						self,
 						None,
 						f'Player {abs(ind - 1) + 1}\nwin!',
-						{'Hurrah!': [self.quit, None]}
+						{
+							'Exit': [self.quit, None],
+							'Restart': [self.restart_game, None],
+							'Load Game': [utils.plug, None],
+						}
 					))
+
+	def restart_game(self):
+		game_window = self.window
+		path = self.path
+		new_game = HexagonalWarGame(path, game_window)
+		new_game.turn = 1
+		new_game.start()
 
 
 class PygameEventHandler:
-	def __init__(self, function):
+	def __init__(self, function, window):
 		self.function = function
+		self.window = window
 
 	def update(self):
 		for event in pygame.fastevent.get():
 			if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
 				self.function()
+			if event.type == pygame.VIDEORESIZE:
+				self.window.surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+				self.window.fullscreen = not self.window.fullscreen
+				if self.window.fullscreen:
+					self.window.surface = pygame.display.set_mode((self.window.width, self.window.height), pygame.FULLSCREEN)
+				else:
+					self.window.surface = pygame.display.set_mode((self.window.__class__.W, self.window.__class__.H), pygame.RESIZABLE)
 
 	def draw(self, surface):
 		pass

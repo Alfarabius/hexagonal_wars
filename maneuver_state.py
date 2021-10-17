@@ -19,7 +19,7 @@ class Maneuver(State):
 		self.selected_unit: Optional[Unit] = selected_unit
 		self.current_hex: Optional[Hexagon] = None
 		self.current_hex_line: Optional[list[Hexagon, ...]] = None
-		self.movement_ques: list[MovementQue, ...] = []
+		self.movement_que: Optional[MovementQue] = None
 
 	def update(self):
 		self.current_hex = self._get_current_hex()
@@ -29,8 +29,8 @@ class Maneuver(State):
 		self.cursor_handler()
 		self.movement_handler()
 
-		for que in self.movement_ques:
-			que.update()
+		if self.movement_que:
+			self.movement_que.update()
 
 	def draw(self, surface):
 		if not self.current_hex_line or not self.current_hex:
@@ -53,7 +53,7 @@ class Maneuver(State):
 	def unit_select_handler(self):
 		for unit in self.game.current_player.army:
 			if unit.is_unit_inside_hexagon(self.current_hex):
-				self.mouse.lmb_reaction(self._select_unit, unit)
+				self.mouse.lmb_reaction(self._select_unit, [unit])
 
 	def cursor_handler(self):
 		if self.current_hex is not None:
@@ -75,15 +75,14 @@ class Maneuver(State):
 	def movement_handler(self):
 		if self._movement_is_possible():
 			self.mouse.lmb_reaction(self._movement_que_maker, None)
-			return
-		else:
+		if self.selected_unit is not None:
 			self.mouse.rmb_reaction(self.unselect_unit, None)
 
 	def _state_change_checker(self):
 		if self._attack_is_possible():
 			self.mouse.lmb_reaction(
 				self.change_state,
-				combat_state.Combat(self.game, self.selected_unit, self.current_hex.container.unit)
+				[combat_state.Combat(self.game, self.selected_unit, self.current_hex.container.unit)]
 			)
 
 	def unselect_unit(self):
@@ -100,7 +99,7 @@ class Maneuver(State):
 			and enemy_unit not in self.game.current_player.army
 
 	def _movement_is_possible(self):
-		if not self.selected_unit or not self.current_hex_line:
+		if not self.selected_unit or not self.current_hex_line or self.movement_que is not None:
 			return False
 		hex_line = []
 		for hexagon in self.current_hex_line:
@@ -122,13 +121,14 @@ class Maneuver(State):
 		self.current_hex_line.remove(self.selected_unit.occupied_hexagon)
 
 	def _movement_que_maker(self):
-		self.movement_ques.append(MovementQue(self.selected_unit, self.current_hex_line, self))
+		self.movement_que = MovementQue(self.selected_unit, self.current_hex_line, self)
 
-	def kill_que(self, que):
-		self.movement_ques.remove(que)
+	def kill_que(self):
+		self.movement_que = None
 
 
 class MovementQue:
+
 	def __init__(self, unit, hexagons: list, state):
 		self.unit = unit
 		self.hexagons = tuple(hexagons)
@@ -136,6 +136,9 @@ class MovementQue:
 		self.state = state
 		self.state.game.map.lock_scroll()
 		self.unit.move(self.hexagons[self.index])
+
+	def __del__(self):
+		pass
 
 	def update(self):
 		rounded_position = (
@@ -146,7 +149,7 @@ class MovementQue:
 		if self.hexagons[self.index] == self.hexagons[-1] \
 			and self.unit.rect.center == rounded_position:
 			self.state.game.map.unlock_scroll()
-			self.state.kill_que(self)
+			self.state.kill_que()
 			return
 
 		if self.unit.rect.center == rounded_position:
