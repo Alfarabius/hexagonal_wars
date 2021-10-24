@@ -107,7 +107,7 @@ class Unit(OnMapObject):
 		self.current_speed = self.SPEED * self.timer.dt
 
 		# sounds
-		self.move_sound = sounds.SOUNDS.march if self.name[0] == 'i' else sounds.SOUNDS.move
+		self.move_sound = sounds.SOUNDS.march if self.name[0] == 'i' or self.name[0] == 'a' else sounds.SOUNDS.move
 
 	def update(self):
 		if not self.is_alive:

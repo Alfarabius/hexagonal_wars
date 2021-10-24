@@ -42,7 +42,7 @@ class Maneuver(State):
 			for hexagon in self.reachable_hexes:
 				if hexagon.container.unit is not None:
 					continue
-				hexagon.draw_midpoint(self.game.map.surface, Sizes.RATIO // 4, Colors.INFO)
+				hexagon.draw_midpoint(self.game.map.surface, Sizes.RATIO // 4, Colors.RED)
 		if not self.current_hex_line or not self.current_hex:
 			return
 		for hexagon in self.current_hex_line:

@@ -19,7 +19,13 @@ BLACK = (0, 0, 0)
 class Terrain:
 	TERRAN_TABLE = {
 		'rock': (False, True),
-		'open': (True, False)
+		'open': (True, False),
+		'road14': (True, False),
+		'city': (True, True),
+		'industry': (True, True),
+		'city_center': (True, True),
+		'suburbia': (True, True),
+		'forest': (True, True)
 	}
 
 	def __init__(self, terrain_type):
@@ -156,4 +162,5 @@ class Hexagon:
 		color = Colors.INFO
 		container.append(self.container.image)
 		container.append(font.render(''.join(str('Type   ' + self.container.terrain.type)), True, color))
+		container.append(font.render(str(self.axial[0] + self.axial[1] * 32), True, color))     # Debug
 		return container

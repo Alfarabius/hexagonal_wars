@@ -6,9 +6,9 @@
   },
   "__comment:": ["type", "index_of_hexagon"],
   "list": [
-    ["tank", 5],
-    ["tank", 36],
-    ["tank", 37],
-    ["infantry", 38]
+    ["tank", 101],
+    ["tank", 102],
+    ["tank", 69],
+    ["infantry", 134]
   ]
 }
