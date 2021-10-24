@@ -2,6 +2,7 @@ import math
 
 import pygame
 
+import colors
 import utils
 from global_sizes import Sizes
 from hexagon import Hexagon, Space, Terrain
@@ -17,7 +18,7 @@ HEX_EDGES = {
 
 
 class Map:
-	HEX_EDGE = Sizes.HEX_EDGE + 2
+	HEX_EDGE = Sizes.HEX_EDGE + 1
 	SCROLL_SPEED = int(HEX_EDGE * 8)
 
 	def __init__(self, path, timer):
@@ -43,19 +44,21 @@ class Map:
 		self.size = tuple(map_config.get('size', {'width': 10, 'height': 10}).values())
 		self.type = map_config.get('type', 'flat_topped')
 		rows = map_config.get('hexes', '')
-		for i in range(self.size[1]):
-			self.spaces.extend(rows.get('row' + str(i + 1), ['open' in range(self.size[0])]))
+		for i in range(1, self.size[1] + 1):
+			self.spaces.extend(rows.get('row' + str(i), ['open' in range(self.size[0])]))
 
 	def _create_map(self, edge):
 		hexes = []
+		print(self.size)
 		for i in range(self.size[1]):
 			for j in range(self.size[0]):
+				print(i * (self.size[0]) + j)
 				hexes.append(
 					Hexagon(
 						(j, i),
 						edge,
 						self.type,
-						Space(Terrain(self.spaces[i * self.size[0] + j])))
+						Space(Terrain(self.spaces[i * (self.size[0]) + j])))
 				)
 		return hexes
 
@@ -75,7 +78,7 @@ class Map:
 
 	def draw(self, surface):
 		surface.blit(self.surface, self.rect)
-		self.surface.fill((200, 200, 150))
+		self.surface.fill(colors.MAP)
 		for hexagon in self.hexes:
 			hexagon.draw(self.surface)
 

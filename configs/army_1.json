@@ -2,13 +2,15 @@
   "__comment": ["name", "power", "movement"],
   "parameters": {
     "tank": ["tank_red", 6, 6],
-    "infantry": ["infantry_red", 2, 4]
+    "infantry": ["infantry_red", 2, 4],
+    "agent": ["agent_red", 0, 5]
   },
   "__comment:": ["type", "index_of_hexagon"],
   "list": [
-    ["tank", 67],
-    ["tank", 66],
-    ["tank", 33],
-    ["infantry", 34]
+    ["tank", 64],
+    ["tank", 65],
+    ["tank", 98],
+    ["infantry", 97],
+    ["agent", 96]
   ]
 }
