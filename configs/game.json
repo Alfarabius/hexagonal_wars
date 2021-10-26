@@ -2,7 +2,7 @@
   "name": "hexagonal wars",
   "turns": 16,
   "players": 2,
-  "map": "configs/map.json",
+  "map": "configs/map_1.json",
   "player_1": "configs/army_1.json",
   "player_2": "configs/army_2.json",
   "wining_conditions": "deathmatch",

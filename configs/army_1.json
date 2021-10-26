@@ -1,16 +1,17 @@
 {
+  "owner": "human",
   "__comment": ["name", "power", "movement"],
   "parameters": {
-    "tank": ["tank_red", 6, 6],
-    "infantry": ["infantry_red", 2, 4],
-    "agent": ["agent_red", 0, 5]
+    "tank": ["tank_red", 6, 6, 0],
+    "infantry": ["infantry_red", 2, 4, 1],
+    "agent": ["agent_red", 0, 5, 1]
   },
   "__comment:": ["type", "index_of_hexagon"],
   "list": [
-    ["tank", 64],
-    ["tank", 65],
-    ["tank", 98],
-    ["infantry", 97],
-    ["agent", 96]
+    ["tank", 66],
+    ["tank", 51],
+    ["tank", 35],
+    ["infantry", 34],
+    ["agent", 50]
   ]
 }

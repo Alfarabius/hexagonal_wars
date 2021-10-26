@@ -24,6 +24,7 @@ class Player:
 
 	def _parse_army(self, path, game_map):
 		player_config = utils.json_to_dict(path)
+		self.owner = player_config.get('owner', 'bot')
 		units_dict = player_config.get('parameters', '')
 		army = player_config.get('list', '')
 		for unit in army:
@@ -35,7 +36,8 @@ class Player:
 				self.army,
 				parameters[1],
 				parameters[2],
-				int(path[-6])
+				int(path[-6]),
+				parameters[3]
 			)
 
 	def restore(self):
