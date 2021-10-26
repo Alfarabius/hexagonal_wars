@@ -1,7 +1,6 @@
-import math
-
 import pygame
 
+import collections
 import colors
 import utils
 from global_sizes import Sizes
@@ -28,8 +27,8 @@ class Map:
 
 		self.hexes = self._create_map(self.HEX_EDGE)
 
-		self.width = self.size[0] * self.HEX_EDGE * 1.55 + self.HEX_EDGE
-		self.height = self.size[1] * self.HEX_EDGE * 1.8 + self.HEX_EDGE
+		self.width = self.size[0] * self.HEX_EDGE * 1.55 + self.HEX_EDGE * 2
+		self.height = self.size[1] * self.HEX_EDGE * 1.8 + self.HEX_EDGE * 2
 
 		self.surface = pygame.Surface((int(self.width),	int(self.height)))
 		self.rect = self.surface.get_rect(topleft=(25 * Sizes.RATIO, 0))
@@ -49,10 +48,8 @@ class Map:
 
 	def _create_map(self, edge):
 		hexes = []
-		print(self.size)
 		for i in range(self.size[1]):
 			for j in range(self.size[0]):
-				print(i * (self.size[0]) + j)
 				hexes.append(
 					Hexagon(
 						(j, i),
@@ -109,18 +106,50 @@ class Map:
 			hexagons.append(self.get_hexagon_by_cube(self._cube_lerp(hex1, hex2, 1.0 / length * i)))
 		return hexagons
 
-	def reachable_hexagons(self, start_hexagon, movement):
+	def hexagons_path(self, hex1: Hexagon, hex2: Hexagon, reachable_hexes: list):
+		if reachable_hexes is None or hex2 not in reachable_hexes:
+			return
+		frontier = Queue()
+		frontier.put(hex1)
+
+		came_from = dict()
+		came_from[hex1] = None
+		path = []
+
+		while not frontier.empty():
+			current = frontier.get()
+
+			if current == hex2:
+				break
+
+			for hexagon in self.get_adjacent_hexes(current):
+				if hexagon not in reachable_hexes:
+					continue
+				if hexagon not in came_from:
+					frontier.put(hexagon)
+					came_from[hexagon] = current
+
+		current = hex2
+		while current != hex1:
+			path.append(current)
+			current = came_from[current]
+		path.reverse()
+		return path
+
+	def reachable_hexagons(self, start_hexagon, movement, passability):
 		hexagons = set()
 		hexagons.add(start_hexagon)
-		neighbors = [[start_hexagon]]
+		frontier = [[start_hexagon]]
 
 		for i in range(1, movement + 1):
-			neighbors.append([])
-			for hexagon in neighbors[i - 1]:
+			frontier.append([])
+			for hexagon in frontier[i - 1]:
 				for neighbor in self.get_adjacent_hexes(hexagon):
-					if neighbor not in hexagons and neighbor.container.terrain.is_passable:
+					if neighbor not in hexagons \
+						and neighbor.container.is_passable(passability)\
+						and neighbor.container.unit is None:
 						hexagons.add(neighbor)
-						neighbors[i].append(neighbor)
+						frontier[i].append(neighbor)
 		return list(hexagons)
 
 	def _make_scroll_buffer(self, offset_x, offset_y):
@@ -168,3 +197,18 @@ class Map:
 			utils.lerp(hex1.cube[1], hex2.cube[1], t),
 			utils.lerp(hex1.cube[2], hex2.cube[2], t)
 		))
+
+
+class Queue:
+	def __init__(self):
+		self.elements = collections.deque()
+
+	def empty(self) -> bool:
+		return not self.elements
+
+	def put(self, x):
+		self.elements.append(x)
+
+	def get(self):
+		return self.elements.popleft()
+

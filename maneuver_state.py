@@ -23,7 +23,11 @@ class Maneuver(State):
 		self.current_hex: Optional[Hexagon] = None
 
 		self.current_hex_line: Optional[list[Hexagon, ...]] = None
-		self.reachable_hexes = None
+		self.reachable_hexes = self.game.map.reachable_hexagons(
+				self.selected_unit.occupied_hexagon,
+				self.selected_unit.movement,
+				self.selected_unit.passability
+			) if selected_unit else None
 		self.movement_que: Optional[MovementQue] = None
 
 	def update(self):
@@ -46,7 +50,10 @@ class Maneuver(State):
 		if not self.current_hex_line or not self.current_hex:
 			return
 		for hexagon in self.current_hex_line:
-			if hexagon is not None and hexagon.container.unit is None and hexagon.container.terrain.is_passable:
+			if hexagon is not None \
+				and hexagon.container.unit is None \
+				and self.selected_unit \
+				and hexagon.container.is_passable(self.selected_unit.passability):
 				hexagon.draw_midpoint(self.game.map.surface,  Sizes.RATIO // 3, Colors.DARK_GREEN)
 		if self.current_hex is not None and self.current_hex.container.unit is None:
 			self.current_hex.draw_midpoint(self.game.map.surface, Sizes.RATIO // 2, Colors.WHITE)
@@ -126,7 +133,7 @@ class Maneuver(State):
 				continue
 			hex_line.append(
 				hexagon.container.unit is None
-				and hexagon.container.is_passable()
+				and hexagon.container.is_passable(self.selected_unit.passability)
 				and self.selected_unit.movement >= len(self.current_hex_line)
 			)
 		return all(hex_line)
@@ -140,12 +147,18 @@ class Maneuver(State):
 		if self.selected_unit.state == 'idle' and self.reachable_hexes is None:
 			self.reachable_hexes = self.game.map.reachable_hexagons(
 				self.selected_unit.occupied_hexagon,
-				self.selected_unit.movement
+				self.selected_unit.movement,
+				self.selected_unit.passability
 			)
 
-		self.current_hex_line = list(self.game.map.hexagons_line(self.selected_unit.occupied_hexagon, self.current_hex))
-		self.current_hex_line.append(self.current_hex)
-		self.current_hex_line.remove(self.selected_unit.occupied_hexagon)
+		self.current_hex_line = self.game.map.hexagons_path(
+			self.selected_unit.occupied_hexagon,
+			self.current_hex,
+			self.reachable_hexes
+		)
+		# self.current_hex_line = list(self.game.map.hexagons_line(self.selected_unit.occupied_hexagon, self.current_hex))
+		# self.current_hex_line.append(self.current_hex)
+		# self.current_hex_line.remove(self.selected_unit.occupied_hexagon)
 
 	def _movement_que_maker(self):
 		self.movement_que = MovementQue(self.selected_unit, self.current_hex_line, self)

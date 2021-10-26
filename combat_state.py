@@ -79,7 +79,7 @@ class Combat(State):
 			and hexagon \
 			and unit.occupied_hexagon.is_adjacent(hexagon) \
 			and hexagon.container.unit is None \
-			and hexagon.container.is_passable() \
+			and hexagon.container.is_passable(unit.passability) \
 			and unit.movement > 0
 
 	def __unselect(self, unit):
@@ -87,7 +87,6 @@ class Combat(State):
 			self.selected_unit = None
 
 	def _select_supporters(self):
-		self.mouse.rmb_reaction(self.change_state, [maneuver_state.Maneuver(self.game, self.selected_unit)])
 		if pygame.key.get_pressed()[pygame.K_SPACE] or \
 			self.possible_attackers_amount == 1:
 			self._complete_supporters_selection()
@@ -103,6 +102,8 @@ class Combat(State):
 				self.cursor = utils.ignore_exception(self.mouse.set_cursor)(['SELECT'])
 				self.mouse.lmb_reaction(self.add_attacker, [unit])
 				self.mouse.rmb_reaction(self.remove_attacker, [unit])
+		if self.current_hex.container.unit is None:
+			self.mouse.rmb_reaction(self.change_state, [maneuver_state.Maneuver(self.game, self.selected_unit)])
 
 	def _get_current_hex(self):
 		for hexagon in self.game.map.hexes:

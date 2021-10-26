@@ -18,19 +18,18 @@ BLACK = (0, 0, 0)
 
 class Terrain:
 	TERRAN_TABLE = {
-		'rock': (False, True),
-		'open': (True, False),
-		'road14': (True, False),
-		'city': (True, True),
-		'industry': (True, True),
-		'city_center': (True, True),
-		'suburbia': (True, True),
-		'forest': (True, True)
+		'rock': (2, True),
+		'open': (0, False),
+		'city': (0, True),
+		'industry': (0, True),
+		'city_center': (0, True),
+		'suburbia': (0, True),
+		'forest': (1, True)
 	}
 
 	def __init__(self, terrain_type):
 		self.type = terrain_type
-		self.is_passable = self.TERRAN_TABLE.get(self.type)[0]
+		self.passability = self.TERRAN_TABLE.get(self.type)[0]
 		self.is_los_block = self.TERRAN_TABLE.get(self.type)[1]
 
 
@@ -45,8 +44,8 @@ class Space:
 
 		self.unit = None
 
-	def is_passable(self):
-		return self.terrain.is_passable
+	def is_passable(self, unit_passability):
+		return unit_passability >= self.terrain.passability
 
 	def draw(self, surface: pygame.Surface, position):
 		self.rect = self.image.get_rect(center=position)
@@ -162,5 +161,6 @@ class Hexagon:
 		color = Colors.INFO
 		container.append(self.container.image)
 		container.append(font.render(''.join(str('Type   ' + self.container.terrain.type)), True, color))
-		container.append(font.render(str(self.axial[0] + self.axial[1] * 32), True, color))     # Debug
+		container.append(font.render(''.join(str('Passability   ' + str(self.container.terrain.passability))), True, color))
+		container.append(font.render(str(self.axial[0] + self.axial[1] * 16), True, color))     # Debug
 		return container

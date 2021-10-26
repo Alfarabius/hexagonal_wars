@@ -78,7 +78,7 @@ class Unit(OnMapObject):
 	STATES = ['move', 'attack', 'idle']
 	SPEED = 12
 
-	def __init__(self, timer, hexagon, name: str, group: sprite.Group, power: int, movement: int, direction: int):
+	def __init__(self, timer, hexagon, name: str, group: sprite.Group, power: int, movement: int, direction: int, passability: int):
 		# states
 		self.is_alive = True
 		# 'move', 'attack', 'idle'
@@ -97,6 +97,7 @@ class Unit(OnMapObject):
 		self.max_movement = movement
 		self.power = power
 		self.movement = movement
+		self.passability = passability
 
 		self.info = self._create_container()
 
@@ -112,6 +113,14 @@ class Unit(OnMapObject):
 	def update(self):
 		if not self.is_alive:
 			self.eliminate()
+
+		if self.occupied_hexagon.container.terrain.type != 'open':
+			if self.name[0] == 't':
+				self.apply_modifiers(-1)
+			elif self.name[0] == 'i':
+				self.apply_modifiers(1)
+		else:
+			self.power = self.max_power
 
 		self.current_speed = self.SPEED * self.timer.dt
 
@@ -207,6 +216,7 @@ class Unit(OnMapObject):
 
 	def destroy(self):
 		self.is_alive = False
+		self.occupied_hexagon.container.remove_unit()
 
 	def eliminate(self):
 		if self.state == 'idle':
@@ -231,7 +241,11 @@ class Unit(OnMapObject):
 		name = self.name.split('_')[0]
 		info.append(self._hud_image)
 		info.append(font.render(name, False, color))
-		info.append(font.render(''.join('Power   ' + str(self.max_power)), False, color))
+		info.append(font.render(''.join('Power   ' + str(self.power)), False, color))
 		info.append(font.render(''.join('MP   ' + str(self.movement)), False, color))
 		info.append(font.render(''.join('Attacks   ' + str(self.attacks)), False, color))
+		info.append(font.render(''.join('Passability   ' + str(self.passability)), False, color))
 		return info
+
+	def apply_modifiers(self, modifier):
+		self.power = self.max_power + modifier
