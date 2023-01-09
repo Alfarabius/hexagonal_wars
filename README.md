@@ -1,6 +1,6 @@
 # hexagonal_wars
 Hex and counter wargame.
-Work in progress.
+<img src="https://img.shields.io/badge/-abandoned project-red?style=for-the-badge">
 
 ### How to run it?
 <p align="left">
